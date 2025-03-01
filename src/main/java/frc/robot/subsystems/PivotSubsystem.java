@@ -53,6 +53,9 @@ public class PivotSubsystem extends SubsystemBase {
         if(goal < 2 && getPivotPosition() > 0.3){
             pivotMotor.set(PivotConstants.kPivotDefaultMotorSpeed);
         }
+        double motorVoltage = pivotPIDController.calculate(getPivotPosition(), goal);// + elevatorFeedForward.calculate();
+        //try elevatorMotor.setPosition(double position);
+        pivotMotor.setVoltage(motorVoltage);
     }
 
     //Make pivot motor run
@@ -82,7 +85,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     public void setPivotPosition(double position) {
-        pivotMotor.setPosition(PivotConstants.kMaxPivotPosition);
+        pivotMotor.setPosition(position);
     }
 
     public void stopPivotMotor() {
@@ -93,11 +96,6 @@ public class PivotSubsystem extends SubsystemBase {
         double motorVoltage = pivotPIDController.calculate(getPivotPosition(), goal);// + elevatorFeedForward.calculate();
         //try elevatorMotor.setPosition(double position);
         pivotMotor.setVoltage(motorVoltage);
-    }
-
-    public void setGoTo(double setpoint) {
-        this.goal = setpoint;
-        pivotMotor.setPosition(setpoint);
     }
 
     public void setGoal(double setpoint) {

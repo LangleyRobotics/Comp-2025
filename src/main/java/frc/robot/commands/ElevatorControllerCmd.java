@@ -12,6 +12,7 @@ import frc.robot.Constants.PivotConstants;
 import frc.robot.MathMethods;
 
 
+
 public class ElevatorControllerCmd extends Command {
   
   private final ElevatorSubsystem elevatorSubsystem;
@@ -23,7 +24,6 @@ public class ElevatorControllerCmd extends Command {
     this.elevatorSubsystem = elevatorSubsystem;
     this.elevatorPositiveDirFunction = elevatorPositiveDirFunction;
     this.elevatorNegativeDirFunction = elevatorNegativeDirFunction;
-
     addRequirements(elevatorSubsystem);
   }
 
@@ -39,15 +39,16 @@ public class ElevatorControllerCmd extends Command {
     double positiveDir = elevatorPositiveDirFunction.get();
     double negativeDir = elevatorNegativeDirFunction.get();
 
-    //double velocity = 0;
-
-    elevatorSubsystem.pidElev();
+    double velocity = 0;
+    // if (!elevatorSubsystem.getMoveForward()){
+    // elevatorSubsystem.pidElev();
+    // }
 
     if(positiveDir > 0){
-      elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() + 0.3);
+      elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() + 0.4);
     }
     else if(negativeDir > 0){
-      elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() - 0.3);
+      elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() - 0.4);
     }
 
     
@@ -58,6 +59,8 @@ public class ElevatorControllerCmd extends Command {
       elevatorSubsystem.setGoal(ElevatorConstants.kMaxElevatorPosition);
 
     }
+    
+    //if()
 
     // //Up elevator
     // if(positiveDir) {

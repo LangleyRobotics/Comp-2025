@@ -3,26 +3,7 @@
   "command": {
     "type": "sequential",
     "data": {
-      "commands": [
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Reef Top Right Path"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Elevator To L3"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Outtake Coral"
-          }
-        }
-      ]
+      "commands": []
     }
   },
   "resetOdom": true,

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonUtils;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -25,6 +26,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -40,10 +42,10 @@ public class VisionSubsystem extends SubsystemBase{
     private final PhotonCamera topLime = new PhotonCamera("Top Limelight");
     
     private Transform3d BOTTOM_CAMERA_TO_CENTER = new Transform3d(
-        new Translation3d(VisionConstants.camX, VisionConstants.camY, VisionConstants.camZ), 
+        new Translation3d(VisionConstants.camXBottom, VisionConstants.camYBottom, VisionConstants.camZBottom), 
         new Rotation3d(0,0,0));
     private Transform3d TOP_CAMERA_TO_CENTER = new Transform3d(
-        new Translation3d(VisionConstants.camX, VisionConstants.camY, VisionConstants.camZ), 
+        new Translation3d(VisionConstants.camXTop, VisionConstants.camYTop, VisionConstants.camZTop), 
         new Rotation3d(0,0,0));
     
     private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
@@ -56,6 +58,10 @@ public class VisionSubsystem extends SubsystemBase{
     private final Supplier<Rotation2d> botRotation2D;
     private final Supplier<SwerveModulePosition[]> botModulePositions;
 
+    private double yaw;
+    private double pitch;
+    private double targetRange;
+
 
     public VisionSubsystem(Supplier<Rotation2d> rotationSupplier,
         Supplier<SwerveModulePosition[]> modulePositionSupplier) {
@@ -67,17 +73,16 @@ public class VisionSubsystem extends SubsystemBase{
             DriveConstants.kDriveKinematics,
             rotationSupplier.get(),
             modulePositionSupplier.get(),
-            new Pose2d(),
-            VisionConstants.STATE_STDS,
-            VisionConstants.VISION_STDS);
+            new Pose2d());
 
         bottomLime.setLED(VisionLEDMode.kDefault);
         topLime.setLED(VisionLEDMode.kDefault);
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Camera Yaw Angle", getYawAngle());
-        SmartDashboard.putNumber("Camera Pitch Angle", getPitchAngle());
+        SmartDashboard.putNumber("Camera Yaw Angle", getAngles()[0]);
+        SmartDashboard.putNumber("Camera Pitch Angle", getAngles()[1]);
+        SmartDashboard.putNumber("Camera To AprilTag Distance", getAngles()[2]);
 
         botPoseEstimator.update(botRotation2D.get(), botModulePositions.get());
         
@@ -119,19 +124,36 @@ public class VisionSubsystem extends SubsystemBase{
         return botPoseEstimator.getEstimatedPosition();
     }
 
-    public double getPitchAngle() {
-        var result = bottomLime.getLatestResult();
-        if(result.hasTargets()) {
-            PhotonTrackedTarget target = result.getBestTarget();
-            return target.getPitch();
-        } return 0;
+    // [0] = yaw, [1] = pitch
+    public double[] getAngles() {
+        var results = topLime.getAllUnreadResults();
+        if(!results.isEmpty()) {
+            var result = results.get(results.size() - 1);
+            if(result.hasTargets() && result.getBestTarget().pitch != 0) {
+                PhotonTrackedTarget bestTarget = result.getBestTarget();
+                // System.out.println(bestTarget.toString());
+                yaw = bestTarget.yaw;
+                pitch = bestTarget.pitch;
+                targetRange = PhotonUtils.calculateDistanceToTargetMeters(
+                                        0.6858, // Measured with a tape measure, or in CAD.
+                                        0.174625, 
+                                        Units.degreesToRadians(Math.PI / 2), // Measured with a protractor, or in CAD.
+                                        Units.degreesToRadians(bestTarget.pitch));
+                // return new double[] {yaw, pitch};
+            }
+        } return new double[] {yaw, pitch, targetRange};
     }
 
-    public double getYawAngle() {
-        var result = bottomLime.getLatestResult();
-        if(result.hasTargets()) {
-            PhotonTrackedTarget target = result.getBestTarget();
-            return target.getYaw();
+    /*public double getYawAngle() {
+        var results = topLime.getAllUnreadResults();
+        if(!results.isEmpty()) {
+            var result = results.get(results.size() - 1);
+            if(result.hasTargets()) {
+                PhotonTrackedTarget bestTarget = result.getBestTarget();
+                return bestTarget.getYaw();
+            }
         } return 0;
     }
+    */
+
 } 

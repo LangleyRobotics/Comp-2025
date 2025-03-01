@@ -9,24 +9,33 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.hal.HALValue;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
+  
 
     private final SparkMax intakeMotor = new SparkMax(IntakeConstants.kIntakeMotor,MotorType.kBrushless);
     // private final Rev2mDistanceSensor test;
     
-    public IntakeSubsystem() {}
+    public IntakeSubsystem() {
+
+
+    }
 
     @Override
     public void periodic() {
+        
+
     }
 
     public void setIntakeMotor(double velocity){
         intakeMotor.set(velocity);
     }
 
+  
     public void stopIntakeMotor(){
         intakeMotor.set(0);
     }

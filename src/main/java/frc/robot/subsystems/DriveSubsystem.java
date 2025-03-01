@@ -20,6 +20,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
+import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -118,8 +119,8 @@ public class DriveSubsystem extends SubsystemBase {
           frontRight.getDrivePosition(),
           new Pose2d());
   
-  private static final double botMass = 52.345; //in kG
-  private static final double botMOI = 4.27224;
+  private static final double botMass = DriveConstants.botMass;
+  private static final double botMOI = DriveConstants.botMOI;
   private static final double wheelFriction = 1.2;
   private static final RobotConfig autoConfig =
       new RobotConfig(
@@ -340,6 +341,10 @@ public class DriveSubsystem extends SubsystemBase {
       SmartDashboard.getNumber(DriveConstants.kRearRightAbsEncoderPort + "desired rotation", 30)
     });
 
+    //Get current pose
+    SmartDashboard.putNumber("Current bot pose X", m_poseEstimator.getEstimatedPosition().getX());
+    SmartDashboard.putNumber("Current bot pose Y", m_poseEstimator.getEstimatedPosition().getY());
+
   }
 
   /**
@@ -445,6 +450,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return new ChassisSpeeds(m_gyro.getVelocityX(), m_gyro.getVelocityY(), Math.toRadians(m_gyro.getRate()));
+  }
+
+  public Rotation2d getRotation() {
+    return m_poseEstimator.getEstimatedPosition().getRotation();
   }
 
   public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {

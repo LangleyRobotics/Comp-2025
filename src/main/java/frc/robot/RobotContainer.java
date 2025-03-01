@@ -14,6 +14,8 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.hal.simulation.RoboRioDataJNI;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,7 +35,9 @@ import frc.robot.Constants.OuttakeConstants;
 import frc.robot.Constants.PivotConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.AllForNaught;
+import frc.robot.commands.AprilAlignCmd;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.DriveToPointCmd;
 //import frc.robot.Trajectories;
 import frc.robot.commands.ElevatorControllerCmd;
 import frc.robot.commands.PivotControllerCmd;
@@ -113,7 +117,7 @@ public class RobotContainer {
       new OuttakeControllerCmd(
         outtakeSubsystem, 
         () -> 0.0, 
-        () -> 0.0));
+        () -> 0.0,()->true));
 
     pivotSubsystem.setDefaultCommand(
       new PivotControllerCmd(
@@ -141,7 +145,7 @@ public class RobotContainer {
     var elevatatorToL3 = new SetElevatorCmd(elevatorSubsystem, 3).withTimeout(1.5);
     var elevatatorToL4 = new SetElevatorCmd(elevatorSubsystem, 4).withTimeout(1.5);
 
-    var outtakeCoral = new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast).withTimeout(2.5);
+    var outtakeCoral = new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false).withTimeout(2.5);
     var intake = new IntakeAutoCmd(intakeSubsystem, 1).withTimeout(2.5);
     
 
@@ -177,7 +181,6 @@ public class RobotContainer {
     // var pivotElevatorAutoOuttake = new ParallelCommandGroup(pivotAutoOuttake, elevatorAutoOuttake);
 
 
-    var outtake2 = new IntakeAutoCmd(intakeSubsystem, 1).withTimeout(1.5);
 
    
 
@@ -186,10 +189,7 @@ public class RobotContainer {
     // SequentialCommandGroup OneBucketAutoNoDrive = new SequentialCommandGroup(
     //   pivotElevatorAutoOuttake,
     //   outtake2);
-    SequentialCommandGroup OneBucketAuto = new SequentialCommandGroup(
-      new WaitCommand(2),
-      outtake2,
-      goStraight);
+    
 
   //  autoChooser.addOption("Nothing", null);
   //  autoChooser.addOption("Straight Auto", goStraight);
@@ -223,17 +223,17 @@ public class RobotContainer {
     
     //Intake coral into arm
     new JoystickButton(operatorController, Buttons.B).whileTrue(new ParallelCommandGroup(
-      new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSlow),
+      new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSlow,()->true),
       new IntakeControllerCmd(intakeSubsystem, () -> IntakeConstants.kIntakeMotorSpeed, 1)));
 
     //Outtake coral from arm
-    new JoystickButton(operatorController, Buttons.A).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast));
+    new JoystickButton(operatorController, Buttons.A).whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false), new IntakeControllerCmd(intakeSubsystem, () -> IntakeConstants.kIntakeMotorSpeed, -1) ));
 
     //Intake algae
-    new JoystickButton(operatorController, Buttons.X).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast));
+    new JoystickButton(operatorController, Buttons.X).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false));
 
     //Outtake algae
-    new JoystickButton(operatorController, Buttons.Y).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> 0.0));
+    new JoystickButton(operatorController, Buttons.Y).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> 0.0,()->false));
 
     //Pivot up
     new JoystickButton(operatorController, Buttons.R3).whileTrue(new PivotControllerCmd(pivotSubsystem, () -> 1.0, () -> 0.0));
@@ -271,6 +271,7 @@ public class RobotContainer {
 
     //Elevator to L1 position
     new POVButton(operatorController, Buttons.DOWN_ARR).whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 1), new SetPivotCmd(pivotSubsystem, 0)));
+    
 
 
 
@@ -294,6 +295,12 @@ public class RobotContainer {
 
     //Reset elevator position (elevator must be all the way down)
     new JoystickButton(driverController, Buttons.B).onTrue(new InstantCommand(() -> elevatorSubsystem.setElevatorPosition(ElevatorConstants.kMinElevatorPosition)));
+
+    //TEST Drive to point (ID 9)
+    new JoystickButton(driverController, Buttons.Menu).whileTrue(new AprilAlignCmd(visionSubsystem, robotDrive, 8));
+
+    //TEST Drive autoaligncmd
+    new JoystickButton(driverController, Buttons.A).whileTrue(new AutoAlign(robotDrive, visionSubsystem,() -> driverController.getLeftY(),() -> driverController.getLeftX(),() -> true));
 
     //Slow drive with d-pad
     new POVButton(driverController, Buttons.UP_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false));

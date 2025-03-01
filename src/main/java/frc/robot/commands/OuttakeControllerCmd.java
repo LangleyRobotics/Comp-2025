@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.Supplier;
 
 import frc.robot.Constants.OuttakeConstants;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.OuttakeSubsystem;
 import frc.robot.MathMethods;
 
@@ -25,13 +26,15 @@ public class OuttakeControllerCmd extends Command{
 
   private final Supplier<Double> outtakePositiveDirFunction;
   private final Supplier<Double> outtakeNegativeDirFunction;
+  private Supplier<Boolean> intaking;
 
 
   public OuttakeControllerCmd(OuttakeSubsystem outtakeSubsystem,
-  Supplier<Double> outtakePositiveDirFunction, Supplier<Double> outtakeNegativeDirFunction) {
+  Supplier<Double> outtakePositiveDirFunction, Supplier<Double> outtakeNegativeDirFunction,Supplier<Boolean> intaking) {
     this.outtakeSubsystem = outtakeSubsystem;
     this.outtakePositiveDirFunction = outtakePositiveDirFunction;
     this.outtakeNegativeDirFunction = outtakeNegativeDirFunction;
+    this.intaking = intaking;
 
     addRequirements(outtakeSubsystem);
   }
@@ -45,13 +48,34 @@ public class OuttakeControllerCmd extends Command{
 
   @Override
   public void execute() {
+      
+      if(!intaking.get()){
+        if(outtakeNegativeDirFunction.get() > 0){
+          outtakeSubsystem.setOuttakeMotor(-outtakeNegativeDirFunction.get());
+        }
+        else if(outtakePositiveDirFunction.get() > 0){
+          outtakeSubsystem.setOuttakeMotor(outtakePositiveDirFunction.get());
+        }
+      }
+      else{
+        if(outtakeSubsystem.getMoveForward()){
+          outtakeSubsystem.setOuttakeMotor(-0.05);
+        }
+        else{
+          if(outtakeSubsystem.getAllGood()){
+            outtakeSubsystem.stopOuttakeMotor();
+          }
+
+          if(outtakeNegativeDirFunction.get() > 0 && !outtakeSubsystem.getAllGood()){
+            outtakeSubsystem.setOuttakeMotor(-outtakeNegativeDirFunction.get());
+          }
+
+          else if(outtakePositiveDirFunction.get() > 0){
+            outtakeSubsystem.setOuttakeMotor(outtakePositiveDirFunction.get());
+          }
+        }
+      }
     
-    if(outtakeNegativeDirFunction.get() > 0){
-      outtakeSubsystem.setOuttakeMotor(-outtakeNegativeDirFunction.get());
-     }
-    else if(outtakePositiveDirFunction.get() > 0){
-      outtakeSubsystem.setOuttakeMotor(outtakePositiveDirFunction.get());
-     }
   }
 
 

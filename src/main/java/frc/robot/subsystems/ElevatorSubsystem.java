@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
 
+import au.grapplerobotics.LaserCan;
+
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.CANBus;
@@ -38,12 +40,17 @@ import frc.robot.Constants.PivotConstants;
 import frc.robot.MathMethods;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import au.grapplerobotics.LaserCan;
+import au.grapplerobotics.ConfigurationFailedException;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 public class ElevatorSubsystem extends SubsystemBase{
-    
+    private LaserCan heimdal;
+    private LaserCan tyr;
+    private boolean allGood = false;
+    private boolean moveForward = false;
     private final TalonFX elevatorMotorRight = new TalonFX(ElevatorConstants.kElevatorMotorRightPort);
     private final TalonFX elevatorMotorLeft = new TalonFX(ElevatorConstants.kElevatorMotorLeftPort);
 
@@ -66,9 +73,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         elevatorPIDController.setTolerance(ElevatorConstants.deadbandAngle);
         elevatorMotorRight.setPosition(0);
         elevatorMotorLeft.setPosition(0);
-
-
-
+        heimdal = new LaserCan(0);
+        tyr = new LaserCan(1);
         TalonFXConfigurator elevatorConfigRight = elevatorMotorRight.getConfigurator();
         elevatorConfigRight.apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
         elevatorConfigRight.apply(
@@ -90,8 +96,48 @@ public class ElevatorSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("Elevator Talon Position", elevatorMotorRight.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("Elevator Talon Voltage", elevatorMotorLeft.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Elevator Goal Position", goal);
-    }
+        LaserCan.Measurement haveCoral = heimdal.getMeasurement();
+        LaserCan.Measurement tooFarBack = tyr.getMeasurement();
+        if(haveCoral!=null&&haveCoral.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
+            allGood = haveCoral.distance_mm < 20;
+            SmartDashboard.putNumber("Coral To Elevator Distance", haveCoral.distance_mm);
+        }
+        else{
+            allGood=false;
+        }
 
+        if(tooFarBack!=null&&tooFarBack.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
+            moveForward = tooFarBack.distance_mm < 20;
+            SmartDashboard.putNumber("Coral To Outtake Distance", tooFarBack.distance_mm);
+
+        }
+        else{
+            moveForward=false;
+        }
+        SmartDashboard.putBoolean("Coral In Elevator", moveForward);
+        SmartDashboard.putBoolean("Coral In Outtake", allGood);
+        
+        // Use the output (and optionally the setpoint) here
+        // double feedforward = 0;
+        // elevatorMotorLeft.setVoltage(output + feedforward);
+        // elevatorMotorRight.setVoltage(-(output + feedforward));
+        
+        double motorVoltage = profiledPIDController.calculate(getElevatorPosition(), goal);// + elevatorFeedForward.calculate();
+        //try elevatorMotor.setPosition(double position);
+        if(!moveForward){
+        elevatorMotorRight.setVoltage(motorVoltage);
+        }
+        else{
+            elevatorMotorRight.setVoltage(0);
+        }
+        //elevatorMotorRight.setVoltage(-motorVoltage);
+    }
+    public boolean getAllGood(){
+        return allGood;
+    }
+    public boolean getMoveForward(){
+        return moveForward;
+   }
     public void setElevatorMotorNoBounds(double velocity) {
         //elevatorMotorRight.set(velocity);
         elevatorMotorRight.set(velocity);
