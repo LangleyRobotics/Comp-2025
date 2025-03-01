@@ -25,6 +25,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -110,14 +111,19 @@ public class DriveSubsystem extends SubsystemBase {
           },
           new Pose2d(0.0, 0.0, new Rotation2d()));
 
-   // TEST Vision Pose Estimators
-   DifferentialDrivePoseEstimator m_poseEstimator =
+  // TEST Vision Pose Estimators
+  DifferentialDrivePoseEstimator m_poseEstimator =
       new DifferentialDrivePoseEstimator(
           DriveConstants.VISIONK_KINEMATICS,
           m_gyro.getRotation2d(),
           frontLeft.getDrivePosition(),
           frontRight.getDrivePosition(),
           new Pose2d());
+
+  public Pose2d getDrivePoseEstimatorPose() {
+    return m_poseEstimator.getEstimatedPosition();
+  }
+  
   
   private static final double botMass = DriveConstants.botMass;
   private static final double botMOI = DriveConstants.botMOI;
@@ -184,6 +190,7 @@ public class DriveSubsystem extends SubsystemBase {
         rearLeft.getPosition()
       }, aprilPose2d);
       // m_gyro.setAngleAdjustment(aprilPose2d.getRotation().getDegrees());
+    m_poseEstimator.resetPose(aprilPose2d);
   }
 
   
@@ -277,6 +284,12 @@ public class DriveSubsystem extends SubsystemBase {
           rearLeft.getPosition(),
           rearRight.getPosition()
         });
+    
+    m_poseEstimator.update(
+      m_gyro.getRotation2d(),
+      new DifferentialDriveWheelPositions(
+        frontLeft.getDrivePosition(),
+        frontRight.getDrivePosition()));
 
 
     //OUTPUT RELEVANT VALUES TO SMARTDASHBOARD
@@ -318,6 +331,9 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Current Y Pose", getPose().getY());
     SmartDashboard.putNumber("Current Rot2D Pose", getPose().getRotation().getDegrees());
 
+    SmartDashboard.putNumber("SwervePoseEstimator Current X Pose", getDrivePoseEstimatorPose().getX());
+    SmartDashboard.putNumber("SwervePoseEstimator Current Y Pose", getDrivePoseEstimatorPose().getY());
+    SmartDashboard.putNumber("SwervePoseEstimator Current Rot Pose", getDrivePoseEstimatorPose().getRotation().getDegrees());
   
     
     SmartDashboard.putNumber("Current Pitch", getPitch());

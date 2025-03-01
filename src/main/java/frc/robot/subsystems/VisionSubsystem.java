@@ -38,8 +38,8 @@ import frc.robot.Constants.VisionConstants;
 
 public class VisionSubsystem extends SubsystemBase{
 
-    private final PhotonCamera bottomLime = new PhotonCamera("Bottom Limelight");
-    private final PhotonCamera topLime = new PhotonCamera("Top Limelight");
+    private final PhotonCamera leftLime = new PhotonCamera("Left Limelight");
+    private final PhotonCamera rightLime = new PhotonCamera("Right Limelight");
     
     private Transform3d BOTTOM_CAMERA_TO_CENTER = new Transform3d(
         new Translation3d(VisionConstants.camXBottom, VisionConstants.camYBottom, VisionConstants.camZBottom), 
@@ -75,24 +75,28 @@ public class VisionSubsystem extends SubsystemBase{
             modulePositionSupplier.get(),
             new Pose2d());
 
-        bottomLime.setLED(VisionLEDMode.kDefault);
-        topLime.setLED(VisionLEDMode.kDefault);
+        leftLime.setLED(VisionLEDMode.kDefault);
+        rightLime.setLED(VisionLEDMode.kDefault);
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Camera Yaw Angle", getAngles()[0]);
-        SmartDashboard.putNumber("Camera Pitch Angle", getAngles()[1]);
-        SmartDashboard.putNumber("Camera To AprilTag Distance", getAngles()[2]);
+        SmartDashboard.putNumber("Right Camera Yaw Angle", getRightAngles()[0]);
+        SmartDashboard.putNumber("Right Camera Pitch Angle", getRightAngles()[1]);
+        SmartDashboard.putNumber("Right Camera To AprilTag Distance", getRightAngles()[2]);
+
+        SmartDashboard.putNumber("Left Camera Yaw Angle", getLeftAngles()[0]);
+        SmartDashboard.putNumber("Left Camera Pitch Angle", getLeftAngles()[1]);
+        SmartDashboard.putNumber("Left Camera To AprilTag Distance", getLeftAngles()[2]);
 
         botPoseEstimator.update(botRotation2D.get(), botModulePositions.get());
         
     }
 
-    public List<PhotonTrackedTarget> getTargets() {
-        var result = bottomLime.getLatestResult();
+    public PhotonTrackedTarget getBestTarget() {
+        var result = leftLime.getLatestResult();
         if(result.hasTargets()) {
             // Get a list of currently tracked targets.
-            return result.getTargets();
+            return result.getBestTarget();
         }
         return null;
     }
@@ -104,13 +108,13 @@ public class VisionSubsystem extends SubsystemBase{
     // }
 
     public void update() {
-        final Optional<EstimatedRobotPose> bottomOptionalEstimatedPose = bottomPhotonPoseEstimator.update(bottomLime.getLatestResult());
+        final Optional<EstimatedRobotPose> bottomOptionalEstimatedPose = bottomPhotonPoseEstimator.update(leftLime.getLatestResult());
         if (bottomOptionalEstimatedPose.isPresent()) {
             final EstimatedRobotPose estimatedPose = bottomOptionalEstimatedPose.get();          
             botPoseEstimator.addVisionMeasurement(estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds);
         }
 
-        final Optional<EstimatedRobotPose> topOptionalEstimatedPose = topPhotonPoseEstimator.update(topLime.getLatestResult());
+        final Optional<EstimatedRobotPose> topOptionalEstimatedPose = topPhotonPoseEstimator.update(rightLime.getLatestResult());
         if (topOptionalEstimatedPose.isPresent()) {
             final EstimatedRobotPose estimatedPose = topOptionalEstimatedPose.get();          
             botPoseEstimator.addVisionMeasurement(estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds);
@@ -125,8 +129,8 @@ public class VisionSubsystem extends SubsystemBase{
     }
 
     // [0] = yaw, [1] = pitch
-    public double[] getAngles() {
-        var results = topLime.getAllUnreadResults();
+    public double[] getLeftAngles() {
+        var results = leftLime.getAllUnreadResults();
         if(!results.isEmpty()) {
             var result = results.get(results.size() - 1);
             if(result.hasTargets() && result.getBestTarget().pitch != 0) {
@@ -144,16 +148,24 @@ public class VisionSubsystem extends SubsystemBase{
         } return new double[] {yaw, pitch, targetRange};
     }
 
-    /*public double getYawAngle() {
-        var results = topLime.getAllUnreadResults();
+    // [0] = yaw, [1] = pitch
+    public double[] getRightAngles() {
+        var results = rightLime.getAllUnreadResults();
         if(!results.isEmpty()) {
             var result = results.get(results.size() - 1);
-            if(result.hasTargets()) {
+            if(result.hasTargets() && result.getBestTarget().pitch != 0) {
                 PhotonTrackedTarget bestTarget = result.getBestTarget();
-                return bestTarget.getYaw();
+                // System.out.println(bestTarget.toString());
+                yaw = bestTarget.yaw;
+                pitch = bestTarget.pitch;
+                targetRange = PhotonUtils.calculateDistanceToTargetMeters(
+                                        0.6858, // Measured with a tape measure, or in CAD.
+                                        0.174625, 
+                                        Units.degreesToRadians(Math.PI / 2), // Measured with a protractor, or in CAD.
+                                        Units.degreesToRadians(bestTarget.pitch));
+                // return new double[] {yaw, pitch};
             }
-        } return 0;
+        } return new double[] {yaw, pitch, targetRange};
     }
-    */
 
 } 

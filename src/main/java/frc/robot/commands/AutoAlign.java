@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
@@ -44,9 +45,9 @@ public class AutoAlign extends Command {
     public void execute() {
 
         // double horizontalDist = Math.abs(VisionConstants.camToReefHeight / Math.tan(visionSubsystem.getAngles()[1]));
-        double turningSpeed = -visionSubsystem.getAngles()[0] / 150;
+        double turningSpeed = -visionSubsystem.getLeftAngles()[0] / 150;
         double ySpeed = -ySpdFunction.get();
-        double xSpeed = -visionSubsystem.getAngles()[1] / 50;
+        double xSpeed = -visionSubsystem.getLeftAngles()[1]/75;
         
         // 2. Apply deadband
         xSpeed = Math.abs(xSpeed) > OIConstants.kDeadband ? xSpeed : 0.0;
@@ -57,6 +58,8 @@ public class AutoAlign extends Command {
         
         xSpeed = xLimiter.calculate(xSpeed) * Constants.kMaxSpeedMetersPerSecond;
         ySpeed = yLimiter.calculate(ySpeed) * Constants.kMaxSpeedMetersPerSecond;
+        SmartDashboard.putNumber("xSpeed", xSpeed);
+        SmartDashboard.putNumber("ySpeed", ySpeed);
         turningSpeed = turningLimiter.calculate(turningSpeed)
                 * Constants.kMaxAngularSpeedRadiansPerSecond;
 
@@ -69,7 +72,7 @@ public class AutoAlign extends Command {
                         xSpeed, ySpeed, turningSpeed, swerveSubsystem.getRotation2d().times(1));
             } else {
                 // Relative to robot
-                chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, turningSpeed);
+                chassisSpeeds = new ChassisSpeeds(xSpeed, 0, turningSpeed);
             }
         // 5. Convert chassis speeds to individual module states
         SwerveModuleState[] moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);

@@ -103,10 +103,10 @@ public final class Constants {
     // IF YOU UPDATE kDriveKinematics, UPDATE kDriveTranslation2Ds TOO PLEASE OMG
     public static final Translation2d[] kDriveTranslation2Ds =
         new Translation2d[] {
-          new Translation2d(kWheelBase / 2, -kTrackWidth / 2), //+- = Front Right 
           new Translation2d(kWheelBase / 2, kTrackWidth / 2), //++ = Front Left 
-          new Translation2d(-kWheelBase / 2, -kTrackWidth / 2), //-- = Rear Right 
-          new Translation2d(-kWheelBase / 2, kTrackWidth / 2)}; //-+ = Rear Left
+          new Translation2d(kWheelBase / 2, -kTrackWidth / 2), //+- = Front Right 
+          new Translation2d(-kWheelBase / 2, kTrackWidth / 2), //-+ = Rear Left 
+          new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)}; //-- = Rear Right
 
 
     public static final boolean kGyroReversed = false;
@@ -122,7 +122,7 @@ public final class Constants {
 
     public static final double kSlowDriveCoefficient = 0.22;
 
-    public static final double botMass = 52.345; // in kg
+    public static final double botMass = 55.792; // in kg
     public static final double botMOI = 4.27224; // kg * m^2
 
   }
@@ -175,7 +175,7 @@ public final class Constants {
     public static final double kPModuleTurningController = 1;
     public static final double kPModuleDriveController = 1;
 
-    public static final double maxDriveVelocityMPS = 9.4; //TEST BC I DON'T KNOW THE REAL NUMBER
+    public static final double maxDriveVelocityMPS = 12.9; //TEST BC I DON'T KNOW THE REAL NUMBER
   }
 
   public static final class OIConstants {
@@ -186,13 +186,13 @@ public final class Constants {
     public static final int kDriverXAxis = 0;
     public static final int kDriverRotAxis = 4;
     public static final int kDriverFieldOrientedButtonIdx = 1;
-    public static final double kDeadband = 0.2;
+    public static final double kDeadband = 0.1;
   }
 
   public static final class OuttakeConstants {
     public static final int kOuttakeMotorPort = 9;
     public static final double kOuttakeMotorSpeedFast = 0.8;
-    public static final double kOuttakeMotorSpeedSlow = 0.3;
+    public static final double kOuttakeMotorSpeedSlow = 0.25;
   }
 
   public static final class PivotConstants {
@@ -268,7 +268,7 @@ public final class Constants {
   
   public static final class IntakeConstants {
     public static final int kIntakeMotor = 13;
-    public static final double kIntakeMotorSpeed = 0.6; //value from 0-1
+    public static final double kIntakeMotorSpeed = 0.45; //value from 0-1
   }
 
   public static final class ClimbConstants {

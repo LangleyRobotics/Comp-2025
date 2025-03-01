@@ -44,6 +44,7 @@ import frc.robot.commands.PivotControllerCmd;
 //Auto Commands
 import frc.robot.commands.IntakeAutoCmd;
 import frc.robot.commands.IntakeControllerCmd;
+import frc.robot.commands.MoveToReefCmd;
 import frc.robot.commands.OuttakeControllerCmd;
 import frc.robot.commands.RumbleCmd;
 import frc.robot.commands.SetElevatorCmd;
@@ -117,14 +118,14 @@ public class RobotContainer {
       new OuttakeControllerCmd(
         outtakeSubsystem, 
         () -> 0.0, 
-        () -> 0.0,()->true));
+        () -> 0.0,
+        ()->true));
 
     pivotSubsystem.setDefaultCommand(
       new PivotControllerCmd(
         pivotSubsystem, 
         () -> 0.0, 
-        () -> 0.0 
-        ));
+        () -> 0.0));
     
 
     // robotDrive.zeroHeading();
@@ -297,11 +298,21 @@ public class RobotContainer {
     new JoystickButton(driverController, Buttons.B).onTrue(new InstantCommand(() -> elevatorSubsystem.setElevatorPosition(ElevatorConstants.kMinElevatorPosition)));
 
     //TEST Drive to point (ID 9)
-    new JoystickButton(driverController, Buttons.Menu).whileTrue(new AprilAlignCmd(visionSubsystem, robotDrive, 8));
+    new JoystickButton(driverController, Buttons.Menu).whileTrue(new DriveToPointCmd(robotDrive, visionSubsystem, 
+      () -> VisionConstants.kAprilTags[visionSubsystem.getBestTarget().fiducialId - 1], () -> visionSubsystem.getCurrentPose()));
 
     //TEST Drive autoaligncmd
-    new JoystickButton(driverController, Buttons.A).whileTrue(new AutoAlign(robotDrive, visionSubsystem,() -> driverController.getLeftY(),() -> driverController.getLeftX(),() -> true));
+    new JoystickButton(driverController, Buttons.A).whileTrue(new AutoAlign(robotDrive, visionSubsystem,() -> driverController.getLeftY(),() -> driverController.getLeftX(),() -> false));
 
+    //TEST Drive MoveToReefCmd
+    new JoystickButton(driverController, Buttons.LB).whileTrue(visionSubsystem.getBestTarget() == null ?
+      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false) :
+      new MoveToReefCmd(robotDrive, visionSubsystem, true));
+
+    new JoystickButton(driverController, Buttons.RB).whileTrue(visionSubsystem.getBestTarget() == null ?
+      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false) :
+      new MoveToReefCmd(robotDrive, visionSubsystem, false));
+    
     //Slow drive with d-pad
     new POVButton(driverController, Buttons.UP_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false));
     new POVButton(driverController, Buttons.DOWN_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false));
