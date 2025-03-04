@@ -31,7 +31,7 @@ public class PivotSubsystem extends SubsystemBase {
 
     public PivotSubsystem() {
         pivotPIDController.setTolerance(PivotConstants.deadbandAngle);
-        pivotMotor.setPosition(0);
+        pivotMotor.setPosition(0.1);
 
         // Configures the kraken like how REV Hardware Client would for Sparkmaxes
         TalonFXConfigurator pivotConfig = pivotMotor.getConfigurator();
@@ -50,7 +50,7 @@ public class PivotSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Pivot Talon Position", getPivotPosition());
         SmartDashboard.putNumber("Pivot Talon Voltage", pivotMotor.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Pivot Goal Position", goal);  
-        if(goal < 2 && getPivotPosition() > 0.3){
+        if(goal < 2 && getPivotPosition() > 0){
             pivotMotor.set(PivotConstants.kPivotDefaultMotorSpeed);
         }
         double motorVoltage = pivotPIDController.calculate(getPivotPosition(), goal);// + elevatorFeedForward.calculate();

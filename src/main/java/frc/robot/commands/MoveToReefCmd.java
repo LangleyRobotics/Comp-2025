@@ -40,7 +40,7 @@ public class MoveToReefCmd extends Command {
   public void execute() {
     double ySpeed;
     if(isLeft) {
-      ySpeed = Math.sin(Math.toRadians(4.5 - visionSubsystem.getLeftAngles()[0])) * 0.5;
+      ySpeed = Math.sin(Math.toRadians(4.5 + visionSubsystem.getLeftAngles()[0])) * 0.5;
     } else {
       ySpeed = Math.sin(Math.toRadians(4.5 - visionSubsystem.getRightAngles()[0])) * 0.5;
     }

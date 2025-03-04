@@ -255,7 +255,7 @@ public class Trajectories {
     TrajectoryGenerator.generateTrajectory(
         new Pose2d(0, 5, new Rotation2d(0)),
         List.of(),
-        new Pose2d(-4, 5.5, new Rotation2d(0)),
+        new Pose2d(2, 6, new Rotation2d(0)),
         config);
 
     //Go Straight and Turn

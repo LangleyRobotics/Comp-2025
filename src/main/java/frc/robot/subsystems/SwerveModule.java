@@ -36,6 +36,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 
@@ -89,7 +90,7 @@ public class SwerveModule extends SubsystemBase{
   public SwerveModule(
       int driveMotorChannel,
       int turningMotorChannel,
-      boolean driveMotorReversed,
+      InvertedValue driveMotorReversed,
       boolean turningMotorReversed,
       int absoluteEncoderChannel,
       boolean absoluteEncoderReversed,
@@ -108,6 +109,7 @@ public class SwerveModule extends SubsystemBase{
               new CurrentLimitsConfigs()
                       .withStatorCurrentLimit(40)
                       .withStatorCurrentLimitEnable(true));
+    driveTalonFXConfig.apply(new MotorOutputConfigs().withInverted(driveMotorReversed));
       
 
     turningSparkMaxConfig = new SparkMaxConfig();
@@ -121,6 +123,7 @@ public class SwerveModule extends SubsystemBase{
 
     // driveTalonFXConfig.apply(driveEncoderConfig);
     turningSparkMaxConfig.apply(turningEncoderConfig);
+    turningSparkMaxConfig.inverted(turningMotorReversed);
 
     // if(driveMotor.configure(driveTalonFXConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters) == REVLibError.kOk) {
     //   isConfig = true;
@@ -133,9 +136,6 @@ public class SwerveModule extends SubsystemBase{
 
 
     absoluteEncoder = new CANcoder(absoluteEncoderChannel);
-
-    driveMotor.setInverted(driveMotorReversed);
-    turningMotor.setInverted(turningMotorReversed);
 
   
 
@@ -170,9 +170,9 @@ public class SwerveModule extends SubsystemBase{
       return turningEncoder.getVelocity();
   }
 
-  public boolean getTurningMotorInvert() {
-    return turningMotor.getInverted();
-  }
+  // public boolean getTurningMotorInvert() {
+  //   return turningMotor.getInverted();
+  // }
 
   
 

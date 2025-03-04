@@ -91,7 +91,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
   
-    // Configure default commands/
+    // Configure default commands
 
      
     robotDrive.setDefaultCommand(
@@ -193,14 +193,14 @@ public class RobotContainer {
     
 
   //  autoChooser.addOption("Nothing", null);
-  //  autoChooser.addOption("Straight Auto", goStraight);
+   
   //  autoChooser.addOption("Straight and Turn Auto", goStraightTurn);
   //  autoChooser.addOption("One Bucket Auto NO DRIVE", OneBucketAutoNoDrive);
   //  autoChooser.addOption("One Bucket Auto", OneBucketAuto);
 
 
    autoChooser = AutoBuilder.buildAutoChooser();
-   
+   autoChooser.addOption("Trajectory Straight Auto", goStraight);
   SmartDashboard.putData("Auto Chooser", autoChooser);
 
   }
@@ -228,7 +228,7 @@ public class RobotContainer {
       new IntakeControllerCmd(intakeSubsystem, () -> IntakeConstants.kIntakeMotorSpeed, 1)));
 
     //Outtake coral from arm
-    new JoystickButton(operatorController, Buttons.A).whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false), new IntakeControllerCmd(intakeSubsystem, () -> IntakeConstants.kIntakeMotorSpeed, -1) ));
+    new JoystickButton(operatorController, Buttons.A).whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false), new IntakeControllerCmd(intakeSubsystem, () -> 0.6, -1) ));
 
     //Intake algae
     new JoystickButton(operatorController, Buttons.X).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false));
@@ -292,26 +292,26 @@ public class RobotContainer {
     new JoystickButton(driverController, Buttons.X).toggleOnTrue(new AllForNaught(robotDrive));
 
     //Reset pivot position (pivot must be all the way down)
-    new JoystickButton(driverController, Buttons.Y).onTrue(new InstantCommand(() -> pivotSubsystem.setPivotPosition(PivotConstants.kMaxPivotPosition)));
+    new JoystickButton(driverController, Buttons.Y).onTrue(new InstantCommand(() -> pivotSubsystem.setPivotPosition(6.5)));
 
     //Reset elevator position (elevator must be all the way down)
     new JoystickButton(driverController, Buttons.B).onTrue(new InstantCommand(() -> elevatorSubsystem.setElevatorPosition(ElevatorConstants.kMinElevatorPosition)));
 
     //TEST Drive to point (ID 9)
-    new JoystickButton(driverController, Buttons.Menu).whileTrue(new DriveToPointCmd(robotDrive, visionSubsystem, 
-      () -> VisionConstants.kAprilTags[visionSubsystem.getBestTarget().fiducialId - 1], () -> visionSubsystem.getCurrentPose()));
+    // new JoystickButton(driverController, Buttons.Menu).whileTrue(new DriveToPointCmd(robotDrive, visionSubsystem, 
+    //   () -> VisionConstants.kAprilTags[visionSubsystem.getBestTarget().fiducialId - 1], () -> visionSubsystem.getCurrentPose()));
 
-    //TEST Drive autoaligncmd
-    new JoystickButton(driverController, Buttons.A).whileTrue(new AutoAlign(robotDrive, visionSubsystem,() -> driverController.getLeftY(),() -> driverController.getLeftX(),() -> false));
+    // //TEST Drive autoaligncmd
+    //new JoystickButton(driverController, Buttons.A).whileTrue(new AutoAlign(robotDrive, visionSubsystem,() -> driverController.getLeftY(),() -> driverController.getLeftX(),() -> false));
 
     //TEST Drive MoveToReefCmd
-    new JoystickButton(driverController, Buttons.LB).whileTrue(visionSubsystem.getBestTarget() == null ?
-      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false) :
-      new MoveToReefCmd(robotDrive, visionSubsystem, true));
+    // new JoystickButton(driverController, Buttons.LB).whileTrue(visionSubsystem.getBestTarget() == null ?
+    //   new SwerveControllerCmd(robotDrive, () -> 0.0, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false) :
+    //   new MoveToReefCmd(robotDrive, visionSubsystem, true));
 
-    new JoystickButton(driverController, Buttons.RB).whileTrue(visionSubsystem.getBestTarget() == null ?
-      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false) :
-      new MoveToReefCmd(robotDrive, visionSubsystem, false));
+    // new JoystickButton(driverController, Buttons.RB).whileTrue(visionSubsystem.getBestTarget() == null ?
+    //   new SwerveControllerCmd(robotDrive, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false) :
+    //   new MoveToReefCmd(robotDrive, visionSubsystem, false));
     
     //Slow drive with d-pad
     new POVButton(driverController, Buttons.UP_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false));

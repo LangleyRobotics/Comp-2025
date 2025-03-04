@@ -55,7 +55,7 @@ public class DriveToPointCmd extends Command {
     @Override
     public void initialize() {
       Pose2d currentPose = robotPoseSupplier.get();
-      ChassisSpeeds fieldVelocity = ChassisSpeeds.fromRobotRelativeSpeeds(swerveSubsystem.getRobotRelativeSpeeds(), swerveSubsystem.getRotation());
+      ChassisSpeeds fieldVelocity = ChassisSpeeds.fromRobotRelativeSpeeds(swerveSubsystem.getRobotRelativeSpeeds(), swerveSubsystem.getRotation2d());
       Translation2d linearFieldVelocity =
           new Translation2d(fieldVelocity.vxMetersPerSecond, fieldVelocity.vyMetersPerSecond);
       driveController.reset(

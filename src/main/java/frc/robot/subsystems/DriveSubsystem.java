@@ -111,19 +111,6 @@ public class DriveSubsystem extends SubsystemBase {
           },
           new Pose2d(0.0, 0.0, new Rotation2d()));
 
-  // TEST Vision Pose Estimators
-  DifferentialDrivePoseEstimator m_poseEstimator =
-      new DifferentialDrivePoseEstimator(
-          DriveConstants.VISIONK_KINEMATICS,
-          m_gyro.getRotation2d(),
-          frontLeft.getDrivePosition(),
-          frontRight.getDrivePosition(),
-          new Pose2d());
-
-  public Pose2d getDrivePoseEstimatorPose() {
-    return m_poseEstimator.getEstimatedPosition();
-  }
-  
   
   private static final double botMass = DriveConstants.botMass;
   private static final double botMOI = DriveConstants.botMOI;
@@ -161,8 +148,8 @@ public class DriveSubsystem extends SubsystemBase {
           this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
           this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                  new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                  new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                  new PIDConstants(0.5, 0.0, 0.0), // Translation PID constants
+                  new PIDConstants(0.04, 0.0, 0.0) // Rotation PID constants
           ),
           autoConfig, // The robot configuration
           () -> {
@@ -190,7 +177,6 @@ public class DriveSubsystem extends SubsystemBase {
         rearLeft.getPosition()
       }, aprilPose2d);
       // m_gyro.setAngleAdjustment(aprilPose2d.getRotation().getDegrees());
-    m_poseEstimator.resetPose(aprilPose2d);
   }
 
   
@@ -284,12 +270,6 @@ public class DriveSubsystem extends SubsystemBase {
           rearLeft.getPosition(),
           rearRight.getPosition()
         });
-    
-    m_poseEstimator.update(
-      m_gyro.getRotation2d(),
-      new DifferentialDriveWheelPositions(
-        frontLeft.getDrivePosition(),
-        frontRight.getDrivePosition()));
 
 
     //OUTPUT RELEVANT VALUES TO SMARTDASHBOARD
@@ -322,20 +302,15 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Match Time FPGA", RobotController.getFPGATime());
     
 
-    SmartDashboard.putBoolean("Front Left Turning Motor inverted: ", frontLeft.getTurningMotorInvert());
-    SmartDashboard.putBoolean("Front Right Turning Motor inverted: ", frontRight.getTurningMotorInvert());
-    SmartDashboard.putBoolean("Rear Left Turning Motor inverted: ", rearLeft.getTurningMotorInvert());
-    SmartDashboard.putBoolean("Rear Right Turning Motor inverted: ", rearRight.getTurningMotorInvert());
+    // SmartDashboard.putBoolean("Front Left Turning Motor inverted: ", frontLeft.getTurningMotorInvert());
+    // SmartDashboard.putBoolean("Front Right Turning Motor inverted: ", frontRight.getTurningMotorInvert());
+    // SmartDashboard.putBoolean("Rear Left Turning Motor inverted: ", rearLeft.getTurningMotorInvert());
+    // SmartDashboard.putBoolean("Rear Right Turning Motor inverted: ", rearRight.getTurningMotorInvert());
 
     SmartDashboard.putNumber("Current X Pose", getPose().getX());
     SmartDashboard.putNumber("Current Y Pose", getPose().getY());
     SmartDashboard.putNumber("Current Rot2D Pose", getPose().getRotation().getDegrees());
 
-    SmartDashboard.putNumber("SwervePoseEstimator Current X Pose", getDrivePoseEstimatorPose().getX());
-    SmartDashboard.putNumber("SwervePoseEstimator Current Y Pose", getDrivePoseEstimatorPose().getY());
-    SmartDashboard.putNumber("SwervePoseEstimator Current Rot Pose", getDrivePoseEstimatorPose().getRotation().getDegrees());
-  
-    
     SmartDashboard.putNumber("Current Pitch", getPitch());
     SmartDashboard.putNumber("Current Roll", getRoll());
 
@@ -356,10 +331,6 @@ public class DriveSubsystem extends SubsystemBase {
       SmartDashboard.getNumber(DriveConstants.kRearRightAbsEncoderPort + "desired speed", 0),
       SmartDashboard.getNumber(DriveConstants.kRearRightAbsEncoderPort + "desired rotation", 30)
     });
-
-    //Get current pose
-    SmartDashboard.putNumber("Current bot pose X", m_poseEstimator.getEstimatedPosition().getX());
-    SmartDashboard.putNumber("Current bot pose Y", m_poseEstimator.getEstimatedPosition().getY());
 
   }
 
@@ -466,10 +437,6 @@ public class DriveSubsystem extends SubsystemBase {
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return new ChassisSpeeds(m_gyro.getVelocityX(), m_gyro.getVelocityY(), Math.toRadians(m_gyro.getRate()));
-  }
-
-  public Rotation2d getRotation() {
-    return m_poseEstimator.getEstimatedPosition().getRotation();
   }
 
   public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {

@@ -58,11 +58,8 @@ public class OuttakeControllerCmd extends Command{
         }
       }
       else{
-        if(outtakeSubsystem.getMoveForward()){
-          outtakeSubsystem.setOuttakeMotor(-0.05);
-        }
-        else{
-          if(outtakeSubsystem.getAllGood()){
+        
+          if(outtakeSubsystem.getAllGood()&&!outtakeSubsystem.getMoveForward()){
             outtakeSubsystem.stopOuttakeMotor();
           }
 
@@ -76,7 +73,7 @@ public class OuttakeControllerCmd extends Command{
         }
       }
     
-  }
+  
 
 
   @Override

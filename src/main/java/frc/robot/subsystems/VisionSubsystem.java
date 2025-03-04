@@ -48,11 +48,11 @@ public class VisionSubsystem extends SubsystemBase{
         new Translation3d(VisionConstants.camXTop, VisionConstants.camYTop, VisionConstants.camZTop), 
         new Rotation3d(0,0,0));
     
-    private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    // private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
     // Construct PhotonPoseEstimator
-    private PhotonPoseEstimator bottomPhotonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, BOTTOM_CAMERA_TO_CENTER);
-    private PhotonPoseEstimator topPhotonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, TOP_CAMERA_TO_CENTER);
+    // private PhotonPoseEstimator bottomPhotonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, BOTTOM_CAMERA_TO_CENTER);
+    // private PhotonPoseEstimator topPhotonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, TOP_CAMERA_TO_CENTER);
 
     private SwerveDrivePoseEstimator botPoseEstimator;
     private final Supplier<Rotation2d> botRotation2D;
@@ -107,26 +107,26 @@ public class VisionSubsystem extends SubsystemBase{
     //     return photonPoseEstimator.update(bottomLime.getLatestResult());
     // }
 
-    public void update() {
-        final Optional<EstimatedRobotPose> bottomOptionalEstimatedPose = bottomPhotonPoseEstimator.update(leftLime.getLatestResult());
-        if (bottomOptionalEstimatedPose.isPresent()) {
-            final EstimatedRobotPose estimatedPose = bottomOptionalEstimatedPose.get();          
-            botPoseEstimator.addVisionMeasurement(estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds);
-        }
+    // public void update() {
+    //     final Optional<EstimatedRobotPose> bottomOptionalEstimatedPose = bottomPhotonPoseEstimator.update(leftLime.getLatestResult());
+    //     if (bottomOptionalEstimatedPose.isPresent()) {
+    //         final EstimatedRobotPose estimatedPose = bottomOptionalEstimatedPose.get();          
+    //         botPoseEstimator.addVisionMeasurement(estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds);
+    //     }
 
-        final Optional<EstimatedRobotPose> topOptionalEstimatedPose = topPhotonPoseEstimator.update(rightLime.getLatestResult());
-        if (topOptionalEstimatedPose.isPresent()) {
-            final EstimatedRobotPose estimatedPose = topOptionalEstimatedPose.get();          
-            botPoseEstimator.addVisionMeasurement(estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds);
-        }
+    //     final Optional<EstimatedRobotPose> topOptionalEstimatedPose = topPhotonPoseEstimator.update(rightLime.getLatestResult());
+    //     if (topOptionalEstimatedPose.isPresent()) {
+    //         final EstimatedRobotPose estimatedPose = topOptionalEstimatedPose.get();          
+    //         botPoseEstimator.addVisionMeasurement(estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds);
+    //     }
 
-        botPoseEstimator.update(botRotation2D.get(), botModulePositions.get());
-    }
+    //     botPoseEstimator.update(botRotation2D.get(), botModulePositions.get());
+    // }
 
-    public Pose2d getCurrentPose() {
-        update();
-        return botPoseEstimator.getEstimatedPosition();
-    }
+    // public Pose2d getCurrentPose() {
+    //     update();
+    //     return botPoseEstimator.getEstimatedPosition();
+    // }
 
     // [0] = yaw, [1] = pitch
     public double[] getLeftAngles() {

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.PIDController;
@@ -59,10 +61,10 @@ public final class Constants {
     public static final boolean kRearLeftTurningMotorReversed = false;
     public static final boolean kFrontLeftTurningMotorReversed = false;
 
-    public static final boolean kFrontRightDriveMotorReversed = true;
-    public static final boolean kRearRightDriveMotorReversed = true;
-    public static final boolean kRearLeftDriveMotorReversed = true;
-    public static final boolean kFrontLeftDriveMotorReversed = true;
+    public static final InvertedValue kFrontRightDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
+    public static final InvertedValue kRearRightDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
+    public static final InvertedValue kRearLeftDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
+    public static final InvertedValue kFrontLeftDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
 
     //CAN IDs for Encoders on Swerve Modules
     public static final int kFrontRightAbsEncoderPort = 18;
@@ -205,7 +207,7 @@ public final class Constants {
 
     //Pivot Positions
     public static final double kMaxPivotPosition = 6.5;
-    public static final double kReefPivotPosition = 4.58;
+    public static final double kReefPivotPosition = 4.88;
     public static final double kMinPivotPosition = -0.2;
 
     public static final double kPivotOffset = 181;
@@ -249,7 +251,7 @@ public final class Constants {
     public static final double l1 = 0.0;//change when robot is built
     public static final double l2 = 12.20;
     public static final double l3 = 39.22;
-    public static final double l4 = 85.6;
+    public static final double l4 = 82.6;
 
     public static final double kElevatorOffset = 0;
     public static final double disPerRot = 360; 
