@@ -61,10 +61,10 @@ public final class Constants {
     public static final boolean kRearLeftTurningMotorReversed = false;
     public static final boolean kFrontLeftTurningMotorReversed = false;
 
-    public static final InvertedValue kFrontRightDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
-    public static final InvertedValue kRearRightDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
-    public static final InvertedValue kRearLeftDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
-    public static final InvertedValue kFrontLeftDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
+    public static final InvertedValue kFrontRightDriveMotorReversed = InvertedValue.Clockwise_Positive;
+    public static final InvertedValue kRearRightDriveMotorReversed = InvertedValue.Clockwise_Positive;
+    public static final InvertedValue kRearLeftDriveMotorReversed = InvertedValue.Clockwise_Positive;
+    public static final InvertedValue kFrontLeftDriveMotorReversed = InvertedValue.Clockwise_Positive;
 
     //CAN IDs for Encoders on Swerve Modules
     public static final int kFrontRightAbsEncoderPort = 18;
@@ -248,10 +248,12 @@ public final class Constants {
     public static final double kMinElevatorPosition = 0;
     public static final double upRightElevatorPosition = 0;
     public static final double scoringPosition = 0;
-    public static final double l1 = 0.0;//change when robot is built
+    public static final double l1 = 0.0; //change when robot is built
     public static final double l2 = 12.20;
+    public static final double lowAlgae = 13.70;
     public static final double l3 = 39.22;
-    public static final double l4 = 82.6;
+    public static final double highAlgae = 40.72;
+    public static final double l4 = 82.9;
 
     public static final double kElevatorOffset = 0;
     public static final double disPerRot = 360; 
@@ -270,7 +272,7 @@ public final class Constants {
   
   public static final class IntakeConstants {
     public static final int kIntakeMotor = 13;
-    public static final double kIntakeMotorSpeed = 0.45; //value from 0-1
+    public static final double kIntakeMotorSpeed = -0.5; //value from 0-1
   }
 
   public static final class ClimbConstants {
@@ -347,8 +349,8 @@ public final class Constants {
     public static final double kPXController = 1;
     public static final double kPYController = 1;
     public static final double kPThetaController = 1;
-    public static final double kAutoMaxSpeedMetersPerSecond = 3;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2;
+    public static final double kAutoMaxSpeedMetersPerSecond = 5;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 4;
     public static final double kAprilDriveSpeedFactor = 0.5;
     public static final double kAprilDriveMaxSpeedMetersPerSecond = 0.69;
     public static final double kAprilDriveDeadbandDegrees = 3;
@@ -373,10 +375,13 @@ public final class Constants {
     public static final double camYTop = 0.165; //0.358
     public static final double camZTop = 0.6096; //0.617-0.0444444
 
-    public static final double kDeadband = 0.01;
+    public static final double kDeadband = 0.001;
 
     public static final double yawCoefficient = 1.0;
     public static final double pitchCoefficient = 1.0;
+
+    public static final double rightLimeReefYawGoal = -23;
+    public static final double leftLimeReefYawGoal = 17;
 
     public static final double camToReefHeight = 0.6096;
     public static final double kPositionTolerance = 0.1;// TWEAK

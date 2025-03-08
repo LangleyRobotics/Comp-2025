@@ -41,7 +41,7 @@ public class ElevatorControllerCmd extends Command {
 
     double velocity = 0;
     // if (!elevatorSubsystem.getMoveForward()){
-    // elevatorSubsystem.pidElev();
+    elevatorSubsystem.pidElev();
     // }
 
     if(positiveDir > 0){

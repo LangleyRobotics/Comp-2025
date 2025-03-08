@@ -148,8 +148,8 @@ public class DriveSubsystem extends SubsystemBase {
           this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
           this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                  new PIDConstants(0.5, 0.0, 0.0), // Translation PID constants
-                  new PIDConstants(0.04, 0.0, 0.0) // Rotation PID constants
+                  new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                  new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
           ),
           autoConfig, // The robot configuration
           () -> {
@@ -401,7 +401,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
-        desiredStates, Constants.kMaxSpeedMetersPerSecond);
+        desiredStates, ModuleConstants.maxDriveVelocityMPS);
     frontLeft.setDesiredState(desiredStates[0]);
     frontRight.setDesiredState(desiredStates[1]);
     rearLeft.setDesiredState(desiredStates[2]);

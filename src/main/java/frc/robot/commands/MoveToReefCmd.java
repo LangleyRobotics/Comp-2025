@@ -40,13 +40,22 @@ public class MoveToReefCmd extends Command {
   public void execute() {
     double ySpeed;
     if(isLeft) {
-      ySpeed = Math.sin(Math.toRadians(4.5 + visionSubsystem.getLeftAngles()[0])) * 0.5;
+      ySpeed = Math.sin(Math.toRadians(
+        (VisionConstants.leftLimeReefYawGoal - visionSubsystem.getLeftAngles()[0]))) * 0.65;
+      SmartDashboard.putNumber("Yaw during MoveToReefCmd Left", visionSubsystem.getLeftAngles()[0]);
+      SmartDashboard.putNumber("Difference in yaw during MoveToReefCmd Left", VisionConstants.leftLimeReefYawGoal - visionSubsystem.getLeftAngles()[0]);
+   
     } else {
-      ySpeed = Math.sin(Math.toRadians(4.5 - visionSubsystem.getRightAngles()[0])) * 0.5;
+      ySpeed = Math.sin(Math.toRadians(
+        (VisionConstants.rightLimeReefYawGoal - visionSubsystem.getRightAngles()[0]))) * 0.65;
+        SmartDashboard.putNumber("Yaw during MoveToReefCmd Right", visionSubsystem.getRightAngles()[0]);
+        SmartDashboard.putNumber("Difference in yaw during MoveToReefCmd Right", VisionConstants.rightLimeReefYawGoal - visionSubsystem.getRightAngles()[0]);
     }
+
+    SmartDashboard.putNumber("ySpeed during MoveToReefCmd", ySpeed);
     
     // 2. Apply deadband
-    ySpeed = Math.abs(ySpeed) > OIConstants.kDeadband ? ySpeed : 0.0;
+    ySpeed = Math.abs(ySpeed) > VisionConstants.kDeadband ? ySpeed : 0.0;
 
     // 3. Make the driving smoother
     ySpeed = yLimiter.calculate(ySpeed) * Constants.kMaxSpeedMetersPerSecond;
@@ -56,7 +65,9 @@ public class MoveToReefCmd extends Command {
     ChassisSpeeds chassisSpeeds;
             // Relative to robot
             chassisSpeeds = new ChassisSpeeds(0, ySpeed, 0);
-    // 5. Convert chassis speeds to individual module states
+  
+  
+            // 5. Convert chassis speeds to individual module states
     SwerveModuleState[] moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
 
     // 6. Output each module states to wheels

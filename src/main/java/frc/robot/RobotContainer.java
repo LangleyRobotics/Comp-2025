@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -45,6 +46,7 @@ import frc.robot.commands.PivotControllerCmd;
 import frc.robot.commands.IntakeAutoCmd;
 import frc.robot.commands.IntakeControllerCmd;
 import frc.robot.commands.MoveToReefCmd;
+import frc.robot.commands.OuttakeAutoCmd;
 import frc.robot.commands.OuttakeControllerCmd;
 import frc.robot.commands.RumbleCmd;
 import frc.robot.commands.SetElevatorCmd;
@@ -186,22 +188,38 @@ public class RobotContainer {
    
 
     SequentialCommandGroup goStraight = robotDrive.AutoCommandFactory(Trajectories.goStraight);
-    SequentialCommandGroup goStraightTurn = robotDrive.AutoCommandFactory(Trajectories.goStraightTurn);
-    // SequentialCommandGroup OneBucketAutoNoDrive = new SequentialCommandGroup(
-    //   pivotElevatorAutoOuttake,
-    //   outtake2);
+    // SequentialCommandGroup goStraightTurn = robotDrive.AutoCommandFactory(Trajectories.goStraightTurn);
+
+
+     var pullThePinStraight = new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2);
     
+     SequentialCommandGroup pullThePinL4 = new SequentialCommandGroup(
+      new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2),
+      new MoveToReefCmd(robotDrive, visionSubsystem, true).withTimeout(2),
+      new SetElevatorCmd(elevatorSubsystem, 4).withTimeout(1.8),
+      new ElevatorControllerCmd(elevatorSubsystem, () -> 0.0, () -> 0.0).withTimeout(4),
+      new OuttakeAutoCmd(outtakeSubsystem,() -> 0.1, () -> 0.0).withTimeout(2),
+      new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 1), new SetPivotCmd(pivotSubsystem, 0)).withTimeout(1.5));
+
+    SequentialCommandGroup pullThePinL2 = new SequentialCommandGroup(
+      new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2),
+      new MoveToReefCmd(robotDrive, visionSubsystem, true).withTimeout(2),
+      new SetElevatorCmd(elevatorSubsystem, 2).withTimeout(1.8),
+      new ElevatorControllerCmd(elevatorSubsystem, () -> 0.0, () -> 0.0).withTimeout(5),
+      new OuttakeAutoCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast).withTimeout(1),
+      new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 1), new SetPivotCmd(pivotSubsystem, 0)).withTimeout(1.5));
 
   //  autoChooser.addOption("Nothing", null);
    
   //  autoChooser.addOption("Straight and Turn Auto", goStraightTurn);
-  //  autoChooser.addOption("One Bucket Auto NO DRIVE", OneBucketAutoNoDrive);
-  //  autoChooser.addOption("One Bucket Auto", OneBucketAuto);
 
 
    autoChooser = AutoBuilder.buildAutoChooser();
    autoChooser.addOption("Trajectory Straight Auto", goStraight);
-  SmartDashboard.putData("Auto Chooser", autoChooser);
+   autoChooser.addOption("Pull The Pin Straight", pullThePinStraight);
+   autoChooser.addOption("Pull The Pin L4", pullThePinL4);
+   autoChooser.addOption("Pull The Pin L2", pullThePinL2);
+   SmartDashboard.putData("Auto Chooser", autoChooser);
 
   }
  
@@ -224,11 +242,11 @@ public class RobotContainer {
     
     //Intake coral into arm
     new JoystickButton(operatorController, Buttons.B).whileTrue(new ParallelCommandGroup(
-      new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSlow,()->true),
+      new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSlow, ()-> true),
       new IntakeControllerCmd(intakeSubsystem, () -> IntakeConstants.kIntakeMotorSpeed, 1)));
 
     //Outtake coral from arm
-    new JoystickButton(operatorController, Buttons.A).whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false), new IntakeControllerCmd(intakeSubsystem, () -> 0.6, -1) ));
+    new JoystickButton(operatorController, Buttons.A).whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false), new IntakeControllerCmd(intakeSubsystem, () -> 0.6, 1) ));
 
     //Intake algae
     new JoystickButton(operatorController, Buttons.X).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast,()->false));
@@ -304,14 +322,14 @@ public class RobotContainer {
     // //TEST Drive autoaligncmd
     //new JoystickButton(driverController, Buttons.A).whileTrue(new AutoAlign(robotDrive, visionSubsystem,() -> driverController.getLeftY(),() -> driverController.getLeftX(),() -> false));
 
-    //TEST Drive MoveToReefCmd
-    // new JoystickButton(driverController, Buttons.LB).whileTrue(visionSubsystem.getBestTarget() == null ?
-    //   new SwerveControllerCmd(robotDrive, () -> 0.0, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false) :
-    //   new MoveToReefCmd(robotDrive, visionSubsystem, true));
+    // TEST Drive MoveToReefCmd
+    new JoystickButton(driverController, Buttons.LB).whileTrue(visionSubsystem.getBestTarget() == null ?
+      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> 0.0, () -> false) :
+      new MoveToReefCmd(robotDrive, visionSubsystem, true));
 
-    // new JoystickButton(driverController, Buttons.RB).whileTrue(visionSubsystem.getBestTarget() == null ?
-    //   new SwerveControllerCmd(robotDrive, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false) :
-    //   new MoveToReefCmd(robotDrive, visionSubsystem, false));
+    new JoystickButton(driverController, Buttons.RB).whileTrue(visionSubsystem.getBestTarget() == null ?
+      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> 0.0, () -> false) :
+      new MoveToReefCmd(robotDrive, visionSubsystem, false));
     
     //Slow drive with d-pad
     new POVButton(driverController, Buttons.UP_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false));
@@ -331,7 +349,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // return the autonomous command given by the drop-down selector in ShuffleBoard
-   return autoChooser.getSelected();
+    return autoChooser.getSelected();
+    // return new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2);
+
   }
 
 }

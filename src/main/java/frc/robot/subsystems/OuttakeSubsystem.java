@@ -56,6 +56,7 @@ public class OuttakeSubsystem extends SubsystemBase {
 
         LaserCan.Measurement haveCoral = heimdal.getMeasurement();
         LaserCan.Measurement tooFarBack = tyr.getMeasurement();
+
         if(haveCoral!=null&&haveCoral.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
             allGood = haveCoral.distance_mm<20;
         }
@@ -70,19 +71,30 @@ public class OuttakeSubsystem extends SubsystemBase {
         else{
             moveForward=false;
         }
+
+        
+
     }
 
 
 
 
-
     public void setOuttakeMotor(double velocity){
-         outtakeMotor.set(velocity);
+        
+         outtakeMotor.set(-velocity);
      }
     
      public void stopOuttakeMotor(){
          outtakeMotor.set(0);
      }
+     public void setOuttakeIntakeMotor(double velocity){
+        if(allGood && !moveForward) {
+            stopOuttakeMotor();
+        }
+        else {
+            outtakeMotor.set(-velocity);
+        }
+    }
      public boolean getAllGood(){
         return allGood;
     }

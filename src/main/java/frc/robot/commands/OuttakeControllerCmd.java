@@ -48,33 +48,26 @@ public class OuttakeControllerCmd extends Command{
 
   @Override
   public void execute() {
-      
-      if(!intaking.get()){
-        if(outtakeNegativeDirFunction.get() > 0){
-          outtakeSubsystem.setOuttakeMotor(-outtakeNegativeDirFunction.get());
-        }
-        else if(outtakePositiveDirFunction.get() > 0){
-          outtakeSubsystem.setOuttakeMotor(outtakePositiveDirFunction.get());
-        }
+      double pos = outtakePositiveDirFunction.get();
+      double neg = outtakeNegativeDirFunction.get();
+    if(!intaking.get()){
+      if(outtakePositiveDirFunction.get() > 0){
+        outtakeSubsystem.setOuttakeMotor(-pos);
       }
-      else{
-        
-          if(outtakeSubsystem.getAllGood()&&!outtakeSubsystem.getMoveForward()){
-            outtakeSubsystem.stopOuttakeMotor();
-          }
-
-          if(outtakeNegativeDirFunction.get() > 0 && !outtakeSubsystem.getAllGood()){
-            outtakeSubsystem.setOuttakeMotor(-outtakeNegativeDirFunction.get());
-          }
-
-          else if(outtakePositiveDirFunction.get() > 0){
-            outtakeSubsystem.setOuttakeMotor(outtakePositiveDirFunction.get());
-          }
-        }
+      else if(outtakeNegativeDirFunction.get() > 0){
+        outtakeSubsystem.setOuttakeMotor(neg);
       }
+    }
+    else{
+      if(outtakePositiveDirFunction.get() > 0){
+        outtakeSubsystem.setOuttakeIntakeMotor(pos);
+      }
+      else if(outtakeNegativeDirFunction.get() > 0){
+        outtakeSubsystem.setOuttakeIntakeMotor(neg);
+      }
+    }
     
-  
-
+  }
 
   @Override
   public void end(boolean interrupted) {

@@ -49,7 +49,7 @@ public class SwerveModule extends SubsystemBase{
   private final SparkMax turningMotor;
 
   private final RelativeEncoder turningEncoder;
-  private final TalonFXConfigurator driveTalonFXConfig;
+  // private final TalonFXConfigurator driveTalonFXConfig;
   private final SparkMaxConfig turningSparkMaxConfig;
   // private final EncoderConfig driveEncoderConfig;
   private final EncoderConfig turningEncoderConfig;
@@ -103,13 +103,12 @@ public class SwerveModule extends SubsystemBase{
     driveMotor = new TalonFX(driveMotorChannel);
     turningMotor = new SparkMax(turningMotorChannel, MotorType.kBrushless);
 
-    driveTalonFXConfig = driveMotor.getConfigurator();
-    driveTalonFXConfig.apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
-    driveTalonFXConfig.apply( 
+    driveMotor.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+    driveMotor.getConfigurator().apply( 
               new CurrentLimitsConfigs()
                       .withStatorCurrentLimit(40)
                       .withStatorCurrentLimitEnable(true));
-    driveTalonFXConfig.apply(new MotorOutputConfigs().withInverted(driveMotorReversed));
+    driveMotor.getConfigurator().apply(new MotorOutputConfigs().withInverted(driveMotorReversed));
       
 
     turningSparkMaxConfig = new SparkMaxConfig();
@@ -128,6 +127,7 @@ public class SwerveModule extends SubsystemBase{
     // if(driveMotor.configure(driveTalonFXConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters) == REVLibError.kOk) {
     //   isConfig = true;
     // }
+    driveMotor.setNeutralMode(NeutralModeValue.Brake);
     turningMotor.configure(turningSparkMaxConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
     
@@ -150,7 +150,8 @@ public class SwerveModule extends SubsystemBase{
 
   @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Motors Configured?", isConfig);   
+        SmartDashboard.putBoolean("Motors Configured?", isConfig); 
+        SmartDashboard.putNumber("yes", driveMotor.getMotorVoltage().getValueAsDouble());  
     }
 
 

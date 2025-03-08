@@ -139,7 +139,7 @@ public class VisionSubsystem extends SubsystemBase{
                 yaw = bestTarget.yaw;
                 pitch = bestTarget.pitch;
                 targetRange = PhotonUtils.calculateDistanceToTargetMeters(
-                                        0.6858, // Measured with a tape measure, or in CAD.
+                                        0.333, // Measured with a tape measure, or in CAD.
                                         0.174625, 
                                         Units.degreesToRadians(Math.PI / 2), // Measured with a protractor, or in CAD.
                                         Units.degreesToRadians(bestTarget.pitch));

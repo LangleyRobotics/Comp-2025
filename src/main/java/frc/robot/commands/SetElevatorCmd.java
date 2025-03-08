@@ -31,8 +31,14 @@ public class SetElevatorCmd extends Command {
     } else if (position == 4) {
       //**L4 position**
       this.targetPosition = ElevatorConstants.l4;
+
     } else if(position == 5){
-      this.targetPosition = ElevatorConstants.kMaxElevatorPosition;
+      this.targetPosition = ElevatorConstants.lowAlgae;
+    }  else if (position == 6){
+        this.targetPosition = ElevatorConstants.highAlgae;
+    }
+    else if (position == 9){
+    this.targetPosition = 82.8;
     } else {
       this.targetPosition = ElevatorConstants.kMinElevatorPosition;
     }
