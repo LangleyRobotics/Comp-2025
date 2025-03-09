@@ -135,7 +135,7 @@ public class DriveSubsystem extends SubsystemBase {
       try {
         new WaitCommand(1.0);
         zeroHeading();
-        //m_gyro.setAngleAdjustment(180);
+        // m_gyro.setAngleAdjustment(180);
       } catch (Exception e) {
       }
     }).start();
@@ -276,30 +276,23 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Robot Heading", getHeading());
     SmartDashboard.putBoolean("NavX connected?", getGyroConnected());
 
-    SmartDashboard.putNumber("Absolute Encoder Angle Front Left", (Math.toDegrees(frontLeft.getAbsoluteEncoderRad())));
-    SmartDashboard.putNumber("Current Angle Front Left", (Math.toDegrees(frontLeft.getTurningPosition())));
-    SmartDashboard.putNumber("Front Left Offset", Math.toDegrees(frontLeft.getAbsoluteEncoderRad()) - Math.toDegrees(frontLeft.getTurningPosition()));
+    // SmartDashboard.putNumber("Absolute Encoder Angle Front Left", (Math.toDegrees(frontLeft.getAbsoluteEncoderRad())));
+    // SmartDashboard.putNumber("Current Angle Front Left", (Math.toDegrees(frontLeft.getTurningPosition())));
+    // SmartDashboard.putNumber("Front Left Offset", Math.toDegrees(frontLeft.getAbsoluteEncoderRad()) - Math.toDegrees(frontLeft.getTurningPosition()));
 
-    SmartDashboard.putNumber("Absolute Encoder Angle Front Right", Math.toDegrees(frontRight.getAbsoluteEncoderRad()));
-    SmartDashboard.putNumber("Current Angle Front Right", Math.toDegrees(frontRight.getTurningPosition()));
-    SmartDashboard.putNumber("Front Right Offset", Math.toDegrees(frontRight.getAbsoluteEncoderRad()) - Math.toDegrees(frontRight.getTurningPosition()));
-
-
-    SmartDashboard.putNumber("Absolute Encoder Angle Rear Left", Math.toDegrees(rearLeft.getAbsoluteEncoderRad()));
-    SmartDashboard.putNumber("Current Angle Rear Left", ((Math.toDegrees(rearLeft.getTurningPosition()))));
-    SmartDashboard.putNumber("Rear Left Offset", Math.toDegrees(rearLeft.getAbsoluteEncoderRad()) - Math.toDegrees(rearLeft.getTurningPosition()));
+    // SmartDashboard.putNumber("Absolute Encoder Angle Front Right", Math.toDegrees(frontRight.getAbsoluteEncoderRad()));
+    // SmartDashboard.putNumber("Current Angle Front Right", Math.toDegrees(frontRight.getTurningPosition()));
+    // SmartDashboard.putNumber("Front Right Offset", Math.toDegrees(frontRight.getAbsoluteEncoderRad()) - Math.toDegrees(frontRight.getTurningPosition()));
 
 
-    SmartDashboard.putNumber("Absolute Encoder Angle Rear Right", Math.toDegrees(rearRight.getAbsoluteEncoderRad()));
-    SmartDashboard.putNumber("Current Angle Rear Right", ((Math.toDegrees(rearRight.getTurningPosition()))));
-    SmartDashboard.putNumber("Rear Right Offset", Math.toDegrees(rearRight.getAbsoluteEncoderRad()) - Math.toDegrees(rearRight.getTurningPosition()));
+    // SmartDashboard.putNumber("Absolute Encoder Angle Rear Left", Math.toDegrees(rearLeft.getAbsoluteEncoderRad()));
+    // SmartDashboard.putNumber("Current Angle Rear Left", ((Math.toDegrees(rearLeft.getTurningPosition()))));
+    // SmartDashboard.putNumber("Rear Left Offset", Math.toDegrees(rearLeft.getAbsoluteEncoderRad()) - Math.toDegrees(rearLeft.getTurningPosition()));
 
-    //ROBOT CONTROLLER VALUES
-    
-    SmartDashboard.putBoolean("Roborio Status", RobotController.isBrownedOut());
-    SmartDashboard.putNumber("Brownout Voltage", RobotController.getBrownoutVoltage());
-    SmartDashboard.putNumber("Battery Voltage", RobotController.getBatteryVoltage());
-    SmartDashboard.putNumber("Match Time FPGA", RobotController.getFPGATime());
+
+    // SmartDashboard.putNumber("Absolute Encoder Angle Rear Right", Math.toDegrees(rearRight.getAbsoluteEncoderRad()));
+    // SmartDashboard.putNumber("Current Angle Rear Right", ((Math.toDegrees(rearRight.getTurningPosition()))));
+    // SmartDashboard.putNumber("Rear Right Offset", Math.toDegrees(rearRight.getAbsoluteEncoderRad()) - Math.toDegrees(rearRight.getTurningPosition()));
     
 
     // SmartDashboard.putBoolean("Front Left Turning Motor inverted: ", frontLeft.getTurningMotorInvert());
@@ -307,30 +300,12 @@ public class DriveSubsystem extends SubsystemBase {
     // SmartDashboard.putBoolean("Rear Left Turning Motor inverted: ", rearLeft.getTurningMotorInvert());
     // SmartDashboard.putBoolean("Rear Right Turning Motor inverted: ", rearRight.getTurningMotorInvert());
 
-    SmartDashboard.putNumber("Current X Pose", getPose().getX());
-    SmartDashboard.putNumber("Current Y Pose", getPose().getY());
-    SmartDashboard.putNumber("Current Rot2D Pose", getPose().getRotation().getDegrees());
+    // SmartDashboard.putNumber("Current X Pose", getPose().getX());
+    // SmartDashboard.putNumber("Current Y Pose", getPose().getY());
+    // SmartDashboard.putNumber("Current Rot2D Pose", getPose().getRotation().getDegrees());
 
-    SmartDashboard.putNumber("Current Pitch", getPitch());
-    SmartDashboard.putNumber("Current Roll", getRoll());
-
-    SmartDashboard.putNumberArray("Advantage Scope Swerve States", new double[] 
-    {Math.toDegrees(frontLeft.getTurningPosition()), frontLeft.getDriveVelocity(),
-      Math.toDegrees(frontRight.getTurningPosition()), frontRight.getDriveVelocity(),
-      Math.toDegrees(rearLeft.getTurningPosition()), rearLeft.getDriveVelocity(),
-      Math.toDegrees(rearRight.getTurningPosition()), rearRight.getDriveVelocity()});
-
-    SmartDashboard.putNumberArray("Advantage Scope Swerve Desired States", new double[] 
-    {
-      SmartDashboard.getNumber(DriveConstants.kFrontLeftAbsEncoderPort + "desired speed", 0),
-      SmartDashboard.getNumber(DriveConstants.kFrontLeftAbsEncoderPort + "desired rotation", 0),
-      SmartDashboard.getNumber(DriveConstants.kFrontRightAbsEncoderPort + "desired speed", 0),
-      SmartDashboard.getNumber(DriveConstants.kFrontRightAbsEncoderPort + "desired rotation", 0),
-      SmartDashboard.getNumber(DriveConstants.kRearLeftAbsEncoderPort + "desired speed", 0),
-      SmartDashboard.getNumber(DriveConstants.kRearLeftAbsEncoderPort + "desired rotation", 0),
-      SmartDashboard.getNumber(DriveConstants.kRearRightAbsEncoderPort + "desired speed", 0),
-      SmartDashboard.getNumber(DriveConstants.kRearRightAbsEncoderPort + "desired rotation", 30)
-    });
+    // SmartDashboard.putNumber("Current Pitch", getPitch());
+    // SmartDashboard.putNumber("Current Roll", getRoll());
 
   }
 

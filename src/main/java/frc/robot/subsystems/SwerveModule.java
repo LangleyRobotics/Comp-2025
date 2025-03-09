@@ -150,8 +150,8 @@ public class SwerveModule extends SubsystemBase{
 
   @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Motors Configured?", isConfig); 
-        SmartDashboard.putNumber("yes", driveMotor.getMotorVoltage().getValueAsDouble());  
+        // SmartDashboard.putBoolean("Motors Configured?", isConfig); 
+        // SmartDashboard.putNumber("yes", driveMotor.getMotorVoltage().getValueAsDouble());  
     }
 
 
@@ -214,9 +214,9 @@ public class SwerveModule extends SubsystemBase{
     state.optimize(getState().angle);
     driveMotor.set(state.speedMetersPerSecond / Constants.kMaxSpeedMetersPerSecond);
     turningMotor.set(turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
-    SmartDashboard.putString("Swerve[" + absoluteEncoder.getDeviceID() + "]  state", state.toString());
-    SmartDashboard.putNumber(absoluteEncoder.getDeviceID() + "desired speed", state.speedMetersPerSecond);
-    SmartDashboard.putNumber(absoluteEncoder.getDeviceID() + "desired rotation", state.angle.getDegrees());
+    // SmartDashboard.putString("Swerve[" + absoluteEncoder.getDeviceID() + "]  state", state.toString());
+    // SmartDashboard.putNumber(absoluteEncoder.getDeviceID() + "desired speed", state.speedMetersPerSecond);
+    // SmartDashboard.putNumber(absoluteEncoder.getDeviceID() + "desired rotation", state.angle.getDegrees());
   }
 
   public void stop() {

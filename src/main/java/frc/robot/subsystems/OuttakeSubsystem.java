@@ -51,25 +51,25 @@ public class OuttakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Outtake Talon Position", outtakeMotor.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("Outtake Talon Voltage", outtakeMotor.getMotorVoltage().getValueAsDouble());
+        // SmartDashboard.putNumber("Outtake Talon Position", outtakeMotor.getPosition().getValueAsDouble());
+        // SmartDashboard.putNumber("Outtake Talon Voltage", outtakeMotor.getMotorVoltage().getValueAsDouble());
 
         LaserCan.Measurement haveCoral = heimdal.getMeasurement();
         LaserCan.Measurement tooFarBack = tyr.getMeasurement();
 
-        if(haveCoral!=null&&haveCoral.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
-            allGood = haveCoral.distance_mm<20;
+        if(haveCoral!=null && haveCoral.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
+            allGood = haveCoral.distance_mm < 20;
         }
         else{
-            allGood=false;
+            allGood = false;
         }
 
-        if(tooFarBack!=null&&tooFarBack.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
-            moveForward = tooFarBack.distance_mm<20;
+        if(tooFarBack != null&&tooFarBack.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
+            moveForward = tooFarBack.distance_mm < 20;
 
         }
         else{
-            moveForward=false;
+            moveForward = false;
         }
 
         

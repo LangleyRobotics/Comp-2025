@@ -58,8 +58,8 @@ public class AutoAlign extends Command {
         
         xSpeed = xLimiter.calculate(xSpeed) * Constants.kMaxSpeedMetersPerSecond;
         ySpeed = yLimiter.calculate(ySpeed) * Constants.kMaxSpeedMetersPerSecond;
-        SmartDashboard.putNumber("xSpeed", xSpeed);
-        SmartDashboard.putNumber("ySpeed", ySpeed);
+        // SmartDashboard.putNumber("xSpeed", xSpeed);
+        // SmartDashboard.putNumber("ySpeed", ySpeed);
         turningSpeed = turningLimiter.calculate(turningSpeed)
                 * Constants.kMaxAngularSpeedRadiansPerSecond;
 

@@ -48,7 +48,7 @@ public class PivotSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Pivot Talon Position", getPivotPosition());
-        SmartDashboard.putNumber("Pivot Talon Voltage", pivotMotor.getMotorVoltage().getValueAsDouble());
+        // SmartDashboard.putNumber("Pivot Talon Voltage", pivotMotor.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Pivot Goal Position", goal);  
         if(goal < 2 && getPivotPosition() > 0){
             pivotMotor.set(PivotConstants.kPivotDefaultMotorSpeed);

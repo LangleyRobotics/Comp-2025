@@ -122,7 +122,7 @@ public final class Constants {
     public static final double kvVoltSecondsPerMeter = 0.8;
     public static final double kaVoltSecondsSquaredPerMeter = 0.15;
 
-    public static final double kSlowDriveCoefficient = 0.22;
+    public static final double kSlowDriveCoefficient = 0.21;
 
     public static final double botMass = 55.792; // in kg
     public static final double botMOI = 4.27224; // kg * m^2

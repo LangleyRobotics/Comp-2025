@@ -39,7 +39,6 @@ import frc.robot.Constants.VisionConstants;
 public class VisionSubsystem extends SubsystemBase{
 
     private final PhotonCamera leftLime = new PhotonCamera("Left Limelight");
-    private final PhotonCamera rightLime = new PhotonCamera("Right Limelight");
     
     private Transform3d BOTTOM_CAMERA_TO_CENTER = new Transform3d(
         new Translation3d(VisionConstants.camXBottom, VisionConstants.camYBottom, VisionConstants.camZBottom), 
@@ -76,17 +75,12 @@ public class VisionSubsystem extends SubsystemBase{
             new Pose2d());
 
         leftLime.setLED(VisionLEDMode.kDefault);
-        rightLime.setLED(VisionLEDMode.kDefault);
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Right Camera Yaw Angle", getRightAngles()[0]);
-        SmartDashboard.putNumber("Right Camera Pitch Angle", getRightAngles()[1]);
-        SmartDashboard.putNumber("Right Camera To AprilTag Distance", getRightAngles()[2]);
-
-        SmartDashboard.putNumber("Left Camera Yaw Angle", getLeftAngles()[0]);
-        SmartDashboard.putNumber("Left Camera Pitch Angle", getLeftAngles()[1]);
-        SmartDashboard.putNumber("Left Camera To AprilTag Distance", getLeftAngles()[2]);
+        // SmartDashboard.putNumber("Left Camera Yaw Angle", getLeftAngles()[0]);
+        // SmartDashboard.putNumber("Left Camera Pitch Angle", getLeftAngles()[1]);
+        // SmartDashboard.putNumber("Left Camera To AprilTag Distance", getLeftAngles()[2]);
 
         botPoseEstimator.update(botRotation2D.get(), botModulePositions.get());
         
@@ -140,26 +134,6 @@ public class VisionSubsystem extends SubsystemBase{
                 pitch = bestTarget.pitch;
                 targetRange = PhotonUtils.calculateDistanceToTargetMeters(
                                         0.333, // Measured with a tape measure, or in CAD.
-                                        0.174625, 
-                                        Units.degreesToRadians(Math.PI / 2), // Measured with a protractor, or in CAD.
-                                        Units.degreesToRadians(bestTarget.pitch));
-                // return new double[] {yaw, pitch};
-            }
-        } return new double[] {yaw, pitch, targetRange};
-    }
-
-    // [0] = yaw, [1] = pitch
-    public double[] getRightAngles() {
-        var results = rightLime.getAllUnreadResults();
-        if(!results.isEmpty()) {
-            var result = results.get(results.size() - 1);
-            if(result.hasTargets() && result.getBestTarget().pitch != 0) {
-                PhotonTrackedTarget bestTarget = result.getBestTarget();
-                // System.out.println(bestTarget.toString());
-                yaw = bestTarget.yaw;
-                pitch = bestTarget.pitch;
-                targetRange = PhotonUtils.calculateDistanceToTargetMeters(
-                                        0.6858, // Measured with a tape measure, or in CAD.
                                         0.174625, 
                                         Units.degreesToRadians(Math.PI / 2), // Measured with a protractor, or in CAD.
                                         Units.degreesToRadians(bestTarget.pitch));

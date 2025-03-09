@@ -94,13 +94,13 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public void periodic() {
         SmartDashboard.putNumber("Elevator Talon Position", elevatorMotorRight.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("Elevator Talon Voltage", elevatorMotorLeft.getMotorVoltage().getValueAsDouble());
+        // SmartDashboard.putNumber("Elevator Talon Voltage", elevatorMotorLeft.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Elevator Goal Position", goal);
         LaserCan.Measurement haveCoral = heimdal.getMeasurement();
         LaserCan.Measurement tooFarBack = tyr.getMeasurement();
         if(haveCoral!=null&&haveCoral.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
             allGood = haveCoral.distance_mm < 20;
-            SmartDashboard.putNumber("Coral To Elevator Distance", haveCoral.distance_mm);
+            // SmartDashboard.putNumber("Coral To Elevator Distance", haveCoral.distance_mm);
         }
         else{
             allGood=false;
@@ -108,7 +108,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
         if(tooFarBack!=null&&tooFarBack.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT){
             moveForward = tooFarBack.distance_mm < 20;
-            SmartDashboard.putNumber("Coral To Outtake Distance", tooFarBack.distance_mm);
+            // SmartDashboard.putNumber("Coral To Outtake Distance", tooFarBack.distance_mm);
 
         }
         else{
@@ -117,20 +117,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         SmartDashboard.putBoolean("Coral In Elevator", moveForward);
         SmartDashboard.putBoolean("Coral In Outtake", allGood);
         
-        // Use the output (and optionally the setpoint) here
-        // double feedforward = 0;
-        // elevatorMotorLeft.setVoltage(output + feedforward);
-        // elevatorMotorRight.setVoltage(-(output + feedforward));
-        
-        double motorVoltage = profiledPIDController.calculate(getElevatorPosition(), goal);// + elevatorFeedForward.calculate();
-        //try elevatorMotor.setPosition(double position);
-        if(!moveForward){
-        elevatorMotorRight.setVoltage(motorVoltage);
-        }
-        else{
-            elevatorMotorRight.setVoltage(0);
-        }
-        //elevatorMotorRight.setVoltage(-motorVoltage);
     }
     public boolean getAllGood(){
         return allGood;
@@ -176,15 +162,18 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public void pidElev() {
-        // Use the output (and optionally the setpoint) here
-        // double feedforward = 0;
-        // elevatorMotorLeft.setVoltage(output + feedforward);
-        // elevatorMotorRight.setVoltage(-(output + feedforward));
-        double motorVoltage = profiledPIDController.calculate(getElevatorPosition(), goal);// + elevatorFeedForward.calculate();
-        //try elevatorMotor.setPosition(double position);
+        double motorVoltage = 0;
+        if(!moveForward){
+            motorVoltage = profiledPIDController.calculate(getElevatorPosition(), goal);
+        }
         elevatorMotorRight.setVoltage(motorVoltage);
-        //elevatorMotorRight.setVoltage(-motorVoltage);
     }
+
+    public void pidElevNoBounds() {
+        double motorVoltage = profiledPIDController.calculate(getElevatorPosition(), goal);
+        elevatorMotorRight.setVoltage(motorVoltage);
+    }
+
     public void setGoal(double setpoint) {
         this.goal = setpoint;
     }

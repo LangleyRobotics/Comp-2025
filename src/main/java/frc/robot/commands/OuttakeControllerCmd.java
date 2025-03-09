@@ -26,14 +26,20 @@ public class OuttakeControllerCmd extends Command{
 
   private final Supplier<Double> outtakePositiveDirFunction;
   private final Supplier<Double> outtakeNegativeDirFunction;
+  private final Supplier<Boolean> allGood;
+  private final Supplier<Boolean> moveForward;
   private Supplier<Boolean> intaking;
 
 
   public OuttakeControllerCmd(OuttakeSubsystem outtakeSubsystem,
-  Supplier<Double> outtakePositiveDirFunction, Supplier<Double> outtakeNegativeDirFunction,Supplier<Boolean> intaking) {
+  Supplier<Double> outtakePositiveDirFunction, Supplier<Double> outtakeNegativeDirFunction,
+  Supplier<Boolean> allGood, Supplier<Boolean> moveForward,
+  Supplier<Boolean> intaking) {
     this.outtakeSubsystem = outtakeSubsystem;
     this.outtakePositiveDirFunction = outtakePositiveDirFunction;
     this.outtakeNegativeDirFunction = outtakeNegativeDirFunction;
+    this.allGood = allGood;
+    this.moveForward = moveForward;
     this.intaking = intaking;
 
     addRequirements(outtakeSubsystem);
@@ -50,6 +56,9 @@ public class OuttakeControllerCmd extends Command{
   public void execute() {
       double pos = outtakePositiveDirFunction.get();
       double neg = outtakeNegativeDirFunction.get();
+      boolean allG = allGood.get();
+      boolean moveF = moveForward.get();
+    
     if(!intaking.get()){
       if(outtakePositiveDirFunction.get() > 0){
         outtakeSubsystem.setOuttakeMotor(-pos);
@@ -58,12 +67,24 @@ public class OuttakeControllerCmd extends Command{
         outtakeSubsystem.setOuttakeMotor(neg);
       }
     }
+
     else{
+     
       if(outtakePositiveDirFunction.get() > 0){
-        outtakeSubsystem.setOuttakeIntakeMotor(pos);
+        if(allG && !moveF) {
+            outtakeSubsystem.stopOuttakeMotor();
+        }
+        else {
+            outtakeSubsystem.setOuttakeMotor(-pos);
+        }
       }
       else if(outtakeNegativeDirFunction.get() > 0){
-        outtakeSubsystem.setOuttakeIntakeMotor(neg);
+        if(allG && !moveF) {
+          outtakeSubsystem.stopOuttakeMotor();
+        }
+        else {
+            outtakeSubsystem.setOuttakeMotor(neg);
+        }
       }
     }
     

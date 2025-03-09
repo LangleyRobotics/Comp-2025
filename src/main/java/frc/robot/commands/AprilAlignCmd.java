@@ -140,11 +140,11 @@ public class AprilAlignCmd extends Command {
  
 
         // Smart dash varibs. The string ones proably work
-        SmartDashboard.putNumber("Automove/X-Speed", xSpeed);
-        SmartDashboard.putNumber("Automove/Y-Speed", ySpeed);
-        SmartDashboard.putNumber("Automove/Turn-Speed", turningSpeed);
-        SmartDashboard.putString("Automove/Target-Pose", targetPose2d.toString());
-        SmartDashboard.putString("Automove/Current-Pose", currentPose2d.toString());
+        // SmartDashboard.putNumber("Automove/X-Speed", xSpeed);
+        // SmartDashboard.putNumber("Automove/Y-Speed", ySpeed);
+        // SmartDashboard.putNumber("Automove/Turn-Speed", turningSpeed);
+        // SmartDashboard.putString("Automove/Target-Pose", targetPose2d.toString());
+        // SmartDashboard.putString("Automove/Current-Pose", currentPose2d.toString());
     }
 
     /**

@@ -20,13 +20,11 @@ import frc.robot.subsystems.VisionSubsystem;
 public class MoveToReefCmd extends Command {
   private DriveSubsystem swerveSubsystem;
   private VisionSubsystem visionSubsystem;
-  private boolean isLeft;
   private final SlewRateLimiter yLimiter;
 
-  public MoveToReefCmd(DriveSubsystem swerveSubsystem, VisionSubsystem visionSubsystem, boolean isLeft) {
+  public MoveToReefCmd(DriveSubsystem swerveSubsystem, VisionSubsystem visionSubsystem) {
     this.swerveSubsystem = swerveSubsystem;
     this.visionSubsystem = visionSubsystem;
-    this.isLeft = isLeft;
     this.yLimiter = new SlewRateLimiter(Constants.kMaxAccelerationMetersPerSecondSquared);
 
     addRequirements(swerveSubsystem, visionSubsystem);
@@ -39,27 +37,19 @@ public class MoveToReefCmd extends Command {
   @Override
   public void execute() {
     double ySpeed;
-    if(isLeft) {
-      ySpeed = Math.sin(Math.toRadians(
-        (VisionConstants.leftLimeReefYawGoal - visionSubsystem.getLeftAngles()[0]))) * 0.65;
-      SmartDashboard.putNumber("Yaw during MoveToReefCmd Left", visionSubsystem.getLeftAngles()[0]);
-      SmartDashboard.putNumber("Difference in yaw during MoveToReefCmd Left", VisionConstants.leftLimeReefYawGoal - visionSubsystem.getLeftAngles()[0]);
-   
-    } else {
-      ySpeed = Math.sin(Math.toRadians(
-        (VisionConstants.rightLimeReefYawGoal - visionSubsystem.getRightAngles()[0]))) * 0.65;
-        SmartDashboard.putNumber("Yaw during MoveToReefCmd Right", visionSubsystem.getRightAngles()[0]);
-        SmartDashboard.putNumber("Difference in yaw during MoveToReefCmd Right", VisionConstants.rightLimeReefYawGoal - visionSubsystem.getRightAngles()[0]);
-    }
+    ySpeed = Math.sin(Math.toRadians(
+      (VisionConstants.leftLimeReefYawGoal - visionSubsystem.getLeftAngles()[0]))) * 0.65;
+    // SmartDashboard.putNumber("Yaw during MoveToReefCmd Left", visionSubsystem.getLeftAngles()[0]);
+    // SmartDashboard.putNumber("Difference in yaw during MoveToReefCmd Left", VisionConstants.leftLimeReefYawGoal - visionSubsystem.getLeftAngles()[0]);
 
-    SmartDashboard.putNumber("ySpeed during MoveToReefCmd", ySpeed);
+    // SmartDashboard.putNumber("ySpeed during MoveToReefCmd", ySpeed);
     
     // 2. Apply deadband
     ySpeed = Math.abs(ySpeed) > VisionConstants.kDeadband ? ySpeed : 0.0;
 
     // 3. Make the driving smoother
     ySpeed = yLimiter.calculate(ySpeed) * Constants.kMaxSpeedMetersPerSecond;
-    SmartDashboard.putNumber("ySpeed", ySpeed);
+    // SmartDashboard.putNumber("ySpeed", ySpeed);
 
     // 4. Construct desired chassis speeds
     ChassisSpeeds chassisSpeeds;

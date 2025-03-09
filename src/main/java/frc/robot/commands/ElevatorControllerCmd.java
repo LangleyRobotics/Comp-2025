@@ -52,14 +52,18 @@ public class ElevatorControllerCmd extends Command {
     }
 
     
-    if(elevatorSubsystem.getGoal() < 0){
-      elevatorSubsystem.setGoal(0.1);
-    }
-    if(elevatorSubsystem.getGoal() > ElevatorConstants.kMaxElevatorPosition){ 
-      elevatorSubsystem.setGoal(ElevatorConstants.kMaxElevatorPosition);
-
-    }
+    //Limits on the top and bottom
+    // if(elevatorSubsystem.getGoal() < 0){
+    //   elevatorSubsystem.setGoal(0.1);
+    // }
+    // if(elevatorSubsystem.getGoal() > ElevatorConstants.kMaxElevatorPosition){ 
+    //   elevatorSubsystem.setGoal(ElevatorConstants.kMaxElevatorPosition);
+    // }
     
+
+
+
+
     //if()
 
     // //Up elevator
