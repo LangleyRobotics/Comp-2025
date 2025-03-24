@@ -31,6 +31,7 @@ import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.*;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
@@ -109,6 +110,10 @@ public class SwerveModule extends SubsystemBase{
                       .withStatorCurrentLimit(40)
                       .withStatorCurrentLimitEnable(true));
     driveMotor.getConfigurator().apply(new MotorOutputConfigs().withInverted(driveMotorReversed));
+
+    FeedbackConfigs driveConfigSwerveRatio = new FeedbackConfigs();
+    driveConfigSwerveRatio.SensorToMechanismRatio = ModuleConstants.sensorToMechanismRatio;
+    driveMotor.getConfigurator().apply(driveConfigSwerveRatio);
       
 
     turningSparkMaxConfig = new SparkMaxConfig();
@@ -215,8 +220,8 @@ public class SwerveModule extends SubsystemBase{
     driveMotor.set(state.speedMetersPerSecond / Constants.kMaxSpeedMetersPerSecond);
     turningMotor.set(turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
     // SmartDashboard.putString("Swerve[" + absoluteEncoder.getDeviceID() + "]  state", state.toString());
-    // SmartDashboard.putNumber(absoluteEncoder.getDeviceID() + "desired speed", state.speedMetersPerSecond);
-    // SmartDashboard.putNumber(absoluteEncoder.getDeviceID() + "desired rotation", state.angle.getDegrees());
+    SmartDashboard.putNumber(absoluteEncoder.getDeviceID() + "desired speed", state.speedMetersPerSecond);
+    SmartDashboard.putNumber(absoluteEncoder.getDeviceID() + "desired rotation", state.angle.getDegrees());
   }
 
   public void stop() {

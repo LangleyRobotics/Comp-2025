@@ -114,8 +114,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         else{
             moveForward=false;
         }
-        SmartDashboard.putBoolean("Coral In Elevator", moveForward);
-        SmartDashboard.putBoolean("Coral In Outtake", allGood);
         
     }
     public boolean getAllGood(){
@@ -163,9 +161,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     public void pidElev() {
         double motorVoltage = 0;
-        if(!moveForward){
-            motorVoltage = profiledPIDController.calculate(getElevatorPosition(), goal);
-        }
+        motorVoltage = profiledPIDController.calculate(getElevatorPosition(), goal);
         elevatorMotorRight.setVoltage(motorVoltage);
     }
 

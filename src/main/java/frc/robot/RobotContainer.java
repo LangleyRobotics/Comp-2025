@@ -11,18 +11,22 @@ import org.ejml.dense.row.decompose.TriangularSolver_CDRM;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.hal.simulation.RoboRioDataJNI;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -76,10 +80,10 @@ public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem robotDrive = new DriveSubsystem();
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private final OuttakeSubsystem outtakeSubsystem = new OuttakeSubsystem();
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
   private final VisionSubsystem visionSubsystem = new VisionSubsystem(robotDrive::getRotation2d, robotDrive::getSwerveModulePositions);
-   private final OuttakeSubsystem outtakeSubsystem = new OuttakeSubsystem();
 
 
   XboxController driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -123,8 +127,6 @@ public class RobotContainer {
         outtakeSubsystem, 
         () -> 0.0, 
         () -> 0.0,
-        () -> outtakeSubsystem.getAllGood(),
-        () -> outtakeSubsystem.getMoveForward(),
         () -> true));
 
     pivotSubsystem.setDefaultCommand(
@@ -152,7 +154,7 @@ public class RobotContainer {
     var elevatatorToL3 = new SetElevatorCmd(elevatorSubsystem, 3).withTimeout(1.5);
     var elevatatorToL4 = new SetElevatorCmd(elevatorSubsystem, 4).withTimeout(1.5);
 
-    var outtakeCoral = new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> false, () -> false, ()->false).withTimeout(2.5);
+    var outtakeCoral = new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, ()->false).withTimeout(2.5);
     var intake = new IntakeAutoCmd(intakeSubsystem, 1).withTimeout(2.5);
     
 
@@ -192,11 +194,20 @@ public class RobotContainer {
    
 
     SequentialCommandGroup goStraight = robotDrive.AutoCommandFactory(Trajectories.goStraight);
-    // SequentialCommandGroup goStraightTurn = robotDrive.AutoCommandFactory(Trajectories.goStraightTurn);
+    SequentialCommandGroup goStraightTurn = robotDrive.AutoCommandFactory(Trajectories.goStraightTurn);
 
 
-     var pullThePinStraight = new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2);
+     var pullThePinStraight = new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1.5);
     
+     //From Drivers' perspective, robot starts to their right
+     SequentialCommandGroup pullThePinStraightTurnRight = new SequentialCommandGroup(
+      new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1),
+      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> -DriveConstants.kSlowDriveCoefficient, () -> false).withTimeout(1.5));
+    
+    SequentialCommandGroup pullThePinStraightTurnLeft = new SequentialCommandGroup(
+      new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1),
+      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> false).withTimeout(1.5));
+
      SequentialCommandGroup pullThePinL4 = new SequentialCommandGroup(
       new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2),
       new MoveToReefCmd(robotDrive, visionSubsystem).withTimeout(2),
@@ -209,9 +220,11 @@ public class RobotContainer {
     SequentialCommandGroup pullThePinL2 = new SequentialCommandGroup(
       new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2),
       new MoveToReefCmd(robotDrive, visionSubsystem).withTimeout(2),
-      new SetElevatorCmd(elevatorSubsystem, 2).withTimeout(1.8),
-      new ElevatorControllerCmd(elevatorSubsystem, () -> 0.0, () -> 0.0).withTimeout(5),
-      new OuttakeAutoCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast).withTimeout(1));
+      new ElevatorAutoCmd(elevatorSubsystem, 2).withTimeout(2.5),
+      new OuttakeAutoCmd(outtakeSubsystem,() -> 0.6, () -> 0.0).withTimeout(2),
+      new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1),
+      new ElevatorAutoCmd(elevatorSubsystem, 1).withTimeout(3),
+      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> false).withTimeout(2));
 
   //  autoChooser.addOption("Nothing", null);
    
@@ -220,7 +233,10 @@ public class RobotContainer {
 
    autoChooser = AutoBuilder.buildAutoChooser();
    autoChooser.addOption("Trajectory Straight Auto", goStraight);
+   autoChooser.addOption("Trajectory Straight Turn Auto", goStraightTurn);
    autoChooser.addOption("Pull The Pin Straight", pullThePinStraight);
+   autoChooser.addOption("Pull The Pin Straight Turn Right", pullThePinStraightTurnRight);
+   autoChooser.addOption("Pull The Pin Straight Turn Left", pullThePinStraightTurnLeft);
    autoChooser.addOption("Pull The Pin L4", pullThePinL4);
    autoChooser.addOption("Pull The Pin L2", pullThePinL2);
    SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -245,18 +261,18 @@ public class RobotContainer {
 
     
     //Intake coral into arm
-    new JoystickButton(operatorController, Buttons.B).whileTrue(new ParallelCommandGroup(
-      new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSlow, () -> outtakeSubsystem.getAllGood(), () -> outtakeSubsystem.getMoveForward(), ()-> true),
+    new JoystickButton(operatorController, Buttons.B).toggleOnTrue(new ParallelRaceGroup(
+      new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSlow, ()-> true),
       new IntakeControllerCmd(intakeSubsystem, () -> IntakeConstants.kIntakeMotorSpeed, 1)));
 
     //Outtake coral from arm
-    new JoystickButton(operatorController, Buttons.A).whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> outtakeSubsystem.getAllGood(), () -> outtakeSubsystem.getMoveForward(), ()->false), new IntakeControllerCmd(intakeSubsystem, () -> 0.6, 1) ));
+    new JoystickButton(operatorController, Buttons.A).whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> false), new IntakeControllerCmd(intakeSubsystem, () -> 0.6, 1) ));
 
     //Intake algae
-    new JoystickButton(operatorController, Buttons.X).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> outtakeSubsystem.getAllGood(), () -> outtakeSubsystem.getMoveForward(), ()->false));
+    new JoystickButton(operatorController, Buttons.X).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, ()->false));
 
     //Outtake algae
-    new JoystickButton(operatorController, Buttons.Y).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> 0.0, () -> outtakeSubsystem.getAllGood(), () -> outtakeSubsystem.getMoveForward(), ()->false));
+    new JoystickButton(operatorController, Buttons.Y).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> 0.0, ()->false));
 
     //Pivot up
     new JoystickButton(operatorController, Buttons.R3).whileTrue(new PivotControllerCmd(pivotSubsystem, () -> 1.0, () -> 0.0));
@@ -337,6 +353,8 @@ public class RobotContainer {
     new POVButton(driverController, Buttons.LEFT_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> 0.0, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false));
     new POVButton(driverController, Buttons.RIGHT_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false));
 
+    //POSE TESTING
+    new JoystickButton(driverController, Buttons.A).whileTrue(new SwerveControllerCmd(robotDrive, () -> 0.55 * (1 - robotDrive.getPose().getX()), () -> 0.0, () -> 0.0, () -> true));
 
 
    // -----------------------------------------------new JoystickButton(driverController, Buttons.B).onTrue(new InstantCommand(() -> robotDrive.resetEncoders()));
@@ -348,9 +366,19 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // return the autonomous command given by the drop-down selector in ShuffleBoard
+
     return autoChooser.getSelected();
-    // return new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2);
+    // return the autonomous command given by the drop-down selector in ShuffleBoard
+  //  try{
+  //       // Load the path you want to follow using its name in the GUI
+  //       PathPlannerPath path = PathPlannerPath.fromPathFile("Straight Path");
+
+  //       // Create a path following command using AutoBuilder. This will also trigger event markers.
+  //       return AutoBuilder.followPath(path);
+  //   } catch (Exception e) {
+  //       DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+  //       return Commands.none();
+  //   }
 
   }
 

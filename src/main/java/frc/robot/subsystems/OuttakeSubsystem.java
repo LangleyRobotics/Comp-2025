@@ -73,7 +73,8 @@ public class OuttakeSubsystem extends SubsystemBase {
         }
 
         
-
+        SmartDashboard.putBoolean("Coral In Elevator", moveForward);
+        SmartDashboard.putBoolean("Coral In Outtake", allGood);
     }
 
 
@@ -87,14 +88,14 @@ public class OuttakeSubsystem extends SubsystemBase {
      public void stopOuttakeMotor(){
          outtakeMotor.set(0);
      }
-     public void setOuttakeIntakeMotor(double velocity){
-        if(allGood && !moveForward) {
-            stopOuttakeMotor();
-        }
-        else {
-            outtakeMotor.set(-velocity);
-        }
-    }
+    //  public void setOuttakeIntakeMotor(double velocity){
+    //     if(allGood && !moveForward) {
+    //         stopOuttakeMotor();
+    //     }
+    //     else {
+    //         outtakeMotor.set(-velocity);
+    //     }
+    // }
      public boolean getAllGood(){
         return allGood;
     }

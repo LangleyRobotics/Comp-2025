@@ -148,8 +148,8 @@ public class DriveSubsystem extends SubsystemBase {
           this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
           this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                  new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                  new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                  new PIDConstants(3, 0.0, 0.03), // Translation PID constants
+                  new PIDConstants(3, 0.0, 0.0) // Rotation PID constants
           ),
           autoConfig, // The robot configuration
           () -> {
@@ -176,7 +176,7 @@ public class DriveSubsystem extends SubsystemBase {
         rearRight.getPosition(),
         rearLeft.getPosition()
       }, aprilPose2d);
-      // m_gyro.setAngleAdjustment(aprilPose2d.getRotation().getDegrees());
+      m_gyro.setAngleAdjustment(aprilPose2d.getRotation().getDegrees());
   }
 
   
@@ -260,7 +260,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  public void periodic() { 
     // Update the odometry in the periodic block
     m_odometry.update(
         m_gyro.getRotation2d(),
@@ -276,23 +276,23 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Robot Heading", getHeading());
     SmartDashboard.putBoolean("NavX connected?", getGyroConnected());
 
-    // SmartDashboard.putNumber("Absolute Encoder Angle Front Left", (Math.toDegrees(frontLeft.getAbsoluteEncoderRad())));
-    // SmartDashboard.putNumber("Current Angle Front Left", (Math.toDegrees(frontLeft.getTurningPosition())));
-    // SmartDashboard.putNumber("Front Left Offset", Math.toDegrees(frontLeft.getAbsoluteEncoderRad()) - Math.toDegrees(frontLeft.getTurningPosition()));
+    SmartDashboard.putNumber("Absolute Encoder Angle Front Left", (Math.toDegrees(frontLeft.getAbsoluteEncoderRad())));
+    SmartDashboard.putNumber("Current Angle Front Left", (Math.toDegrees(frontLeft.getTurningPosition())));
+    SmartDashboard.putNumber("Front Left Offset", Math.toDegrees(frontLeft.getAbsoluteEncoderRad()) - Math.toDegrees(frontLeft.getTurningPosition()));
 
-    // SmartDashboard.putNumber("Absolute Encoder Angle Front Right", Math.toDegrees(frontRight.getAbsoluteEncoderRad()));
-    // SmartDashboard.putNumber("Current Angle Front Right", Math.toDegrees(frontRight.getTurningPosition()));
-    // SmartDashboard.putNumber("Front Right Offset", Math.toDegrees(frontRight.getAbsoluteEncoderRad()) - Math.toDegrees(frontRight.getTurningPosition()));
-
-
-    // SmartDashboard.putNumber("Absolute Encoder Angle Rear Left", Math.toDegrees(rearLeft.getAbsoluteEncoderRad()));
-    // SmartDashboard.putNumber("Current Angle Rear Left", ((Math.toDegrees(rearLeft.getTurningPosition()))));
-    // SmartDashboard.putNumber("Rear Left Offset", Math.toDegrees(rearLeft.getAbsoluteEncoderRad()) - Math.toDegrees(rearLeft.getTurningPosition()));
+    SmartDashboard.putNumber("Absolute Encoder Angle Front Right", Math.toDegrees(frontRight.getAbsoluteEncoderRad()));
+    SmartDashboard.putNumber("Current Angle Front Right", Math.toDegrees(frontRight.getTurningPosition()));
+    SmartDashboard.putNumber("Front Right Offset", Math.toDegrees(frontRight.getAbsoluteEncoderRad()) - Math.toDegrees(frontRight.getTurningPosition()));
 
 
-    // SmartDashboard.putNumber("Absolute Encoder Angle Rear Right", Math.toDegrees(rearRight.getAbsoluteEncoderRad()));
-    // SmartDashboard.putNumber("Current Angle Rear Right", ((Math.toDegrees(rearRight.getTurningPosition()))));
-    // SmartDashboard.putNumber("Rear Right Offset", Math.toDegrees(rearRight.getAbsoluteEncoderRad()) - Math.toDegrees(rearRight.getTurningPosition()));
+    SmartDashboard.putNumber("Absolute Encoder Angle Rear Left", Math.toDegrees(rearLeft.getAbsoluteEncoderRad()));
+    SmartDashboard.putNumber("Current Angle Rear Left", ((Math.toDegrees(rearLeft.getTurningPosition()))));
+    SmartDashboard.putNumber("Rear Left Offset", Math.toDegrees(rearLeft.getAbsoluteEncoderRad()) - Math.toDegrees(rearLeft.getTurningPosition()));
+
+
+    SmartDashboard.putNumber("Absolute Encoder Angle Rear Right", Math.toDegrees(rearRight.getAbsoluteEncoderRad()));
+    SmartDashboard.putNumber("Current Angle Rear Right", ((Math.toDegrees(rearRight.getTurningPosition()))));
+    SmartDashboard.putNumber("Rear Right Offset", Math.toDegrees(rearRight.getAbsoluteEncoderRad()) - Math.toDegrees(rearRight.getTurningPosition()));
     
 
     // SmartDashboard.putBoolean("Front Left Turning Motor inverted: ", frontLeft.getTurningMotorInvert());
@@ -300,9 +300,9 @@ public class DriveSubsystem extends SubsystemBase {
     // SmartDashboard.putBoolean("Rear Left Turning Motor inverted: ", rearLeft.getTurningMotorInvert());
     // SmartDashboard.putBoolean("Rear Right Turning Motor inverted: ", rearRight.getTurningMotorInvert());
 
-    // SmartDashboard.putNumber("Current X Pose", getPose().getX());
-    // SmartDashboard.putNumber("Current Y Pose", getPose().getY());
-    // SmartDashboard.putNumber("Current Rot2D Pose", getPose().getRotation().getDegrees());
+    SmartDashboard.putNumber("Current X Pose", getPose().getX());
+    SmartDashboard.putNumber("Current Y Pose", getPose().getY());
+    SmartDashboard.putNumber("Current Rot2D Pose", getPose().getRotation().getDegrees());
 
     // SmartDashboard.putNumber("Current Pitch", getPitch());
     // SmartDashboard.putNumber("Current Roll", getRoll());
@@ -412,6 +412,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return new ChassisSpeeds(m_gyro.getVelocityX(), m_gyro.getVelocityY(), Math.toRadians(m_gyro.getRate()));
+    // return new ChassisSpeeds(frontLeft.getDriveVelocity() * Math.cos(frontLeft.getAbsoluteEncoderRad()), 
+    //                          frontLeft.getDriveVelocity() * Math.sin(frontLeft.getAbsoluteEncoderRad()),
+    //                          Math.toRadians(m_gyro.getRate()));
   }
 
   public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {

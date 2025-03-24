@@ -61,10 +61,10 @@ public final class Constants {
     public static final boolean kRearLeftTurningMotorReversed = false;
     public static final boolean kFrontLeftTurningMotorReversed = false;
 
-    public static final InvertedValue kFrontRightDriveMotorReversed = InvertedValue.Clockwise_Positive;
-    public static final InvertedValue kRearRightDriveMotorReversed = InvertedValue.Clockwise_Positive;
-    public static final InvertedValue kRearLeftDriveMotorReversed = InvertedValue.Clockwise_Positive;
-    public static final InvertedValue kFrontLeftDriveMotorReversed = InvertedValue.Clockwise_Positive;
+    public static final InvertedValue kFrontRightDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
+    public static final InvertedValue kRearRightDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
+    public static final InvertedValue kRearLeftDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
+    public static final InvertedValue kFrontLeftDriveMotorReversed = InvertedValue.CounterClockwise_Positive;
 
     //CAN IDs for Encoders on Swerve Modules
     public static final int kFrontRightAbsEncoderPort = 18;
@@ -79,10 +79,10 @@ public final class Constants {
     public static final boolean kFrontLeftDriveAbsoluteEncoderReversed = true;
 
     //Fix Front and rear left offsets (radians)
-    public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = Math.toRadians(-3.5156);
-    public static final double kRearRightDriveAbsoluteEncoderOffsetRad = Math.toRadians(-104.4);
-    public static final double kRearLeftDriveAbsoluteEncoderOffsetRad = Math.toRadians(113.203);
-    public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = Math.toRadians(-81.7);
+    public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = Math.toRadians(173.58); //-3.5156
+    public static final double kRearRightDriveAbsoluteEncoderOffsetRad = Math.toRadians(68.73); //-104.4
+    public static final double kRearLeftDriveAbsoluteEncoderOffsetRad = Math.toRadians(-67.41); //113.203
+    public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = Math.toRadians(100.1); //-81.7
 
     // Distance between centers of right and left wheels on robot
     public static final double kTrackWidth = 0.6604;
@@ -105,10 +105,10 @@ public final class Constants {
     // IF YOU UPDATE kDriveKinematics, UPDATE kDriveTranslation2Ds TOO PLEASE OMG
     public static final Translation2d[] kDriveTranslation2Ds =
         new Translation2d[] {
-          new Translation2d(kWheelBase / 2, kTrackWidth / 2), //++ = Front Left 
-          new Translation2d(kWheelBase / 2, -kTrackWidth / 2), //+- = Front Right 
-          new Translation2d(-kWheelBase / 2, kTrackWidth / 2), //-+ = Rear Left 
-          new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)}; //-- = Rear Right
+          new Translation2d(kWheelBase / 2, -kTrackWidth / 2), //++ = Front Left 
+          new Translation2d(kWheelBase / 2, kTrackWidth / 2), //+- = Front Right 
+          new Translation2d(-kWheelBase / 2, -kTrackWidth / 2), //-+ = Rear Left 
+          new Translation2d(-kWheelBase / 2, kTrackWidth / 2)}; //-- = Rear Right
 
 
     public static final boolean kGyroReversed = false;
@@ -122,7 +122,7 @@ public final class Constants {
     public static final double kvVoltSecondsPerMeter = 0.8;
     public static final double kaVoltSecondsSquaredPerMeter = 0.15;
 
-    public static final double kSlowDriveCoefficient = 0.21;
+    public static final double kSlowDriveCoefficient = 0.19;
 
     public static final double botMass = 55.792; // in kg
     public static final double botMOI = 4.27224; // kg * m^2
@@ -177,7 +177,9 @@ public final class Constants {
     public static final double kPModuleTurningController = 1;
     public static final double kPModuleDriveController = 1;
 
-    public static final double maxDriveVelocityMPS = 12.9; //TEST BC I DON'T KNOW THE REAL NUMBER
+    public static final double maxDriveVelocityMPS = 9.4; //TEST BC I DON'T KNOW THE REAL NUMBER
+
+    public static final double sensorToMechanismRatio = 22.55;
   }
 
   public static final class OIConstants {
@@ -194,7 +196,7 @@ public final class Constants {
   public static final class OuttakeConstants {
     public static final int kOuttakeMotorPort = 9;
     public static final double kOuttakeMotorSpeedFast = 0.8;
-    public static final double kOuttakeMotorSpeedSlow = 0.25;
+    public static final double kOuttakeMotorSpeedSlow = 0.4;
   }
 
   public static final class PivotConstants {
@@ -346,9 +348,9 @@ public final class Constants {
 
   public static final class AutoConstants {
 
-    public static final double kPXController = 1;
-    public static final double kPYController = 1;
-    public static final double kPThetaController = 1;
+    public static final double kPXController = 0.8;
+    public static final double kPYController = 0.8;
+    public static final double kPThetaController = 0.04;
     public static final double kAutoMaxSpeedMetersPerSecond = 5;
     public static final double kAutoMaxAccelerationMetersPerSecondSquared = 4;
     public static final double kAprilDriveSpeedFactor = 0.5;
@@ -381,7 +383,7 @@ public final class Constants {
     public static final double pitchCoefficient = 1.0;
 
     public static final double rightLimeReefYawGoal = -23;
-    public static final double leftLimeReefYawGoal = 17;
+    public static final double leftLimeReefYawGoal = 17.3;
 
     public static final double camToReefHeight = 0.6096;
     public static final double kPositionTolerance = 0.1;// TWEAK

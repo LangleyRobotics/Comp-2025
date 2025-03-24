@@ -251,18 +251,26 @@ public class Trajectories {
         config);
 
     //Go Straight
+    // public static final Trajectory goStraight =
+    // TrajectoryGenerator.generateTrajectory(
+    //     new Pose2d(5.792, 4.045, new Rotation2d(0)),
+    //     List.of(new Translation2d(6.5, 4.045)),
+    //     new Pose2d(7.166, 4.045, new Rotation2d(0)),
+    //     config);
+
+    //Should go forward
     public static final Trajectory goStraight =
     TrajectoryGenerator.generateTrajectory(
-        new Pose2d(5.792, 4.045, new Rotation2d(0)),
-        List.of(new Translation2d(6.5, 4.045)),
-        new Pose2d(7.166, 4.045, new Rotation2d(0)),
+        new Pose2d(0, 0, new Rotation2d(0)),
+        List.of(),
+        new Pose2d(-20, 0, new Rotation2d(0)),
         config);
 
     //Go Straight and Turn
     public static final Trajectory goStraightTurn =
     TrajectoryGenerator.generateTrajectory(
-        new Pose2d(0, 5, new Rotation2d(0)),
-        List.of(),
-        new Pose2d(-4, 5.5, new Rotation2d(Math.PI)),
+        new Pose2d(0, 0, new Rotation2d(0)),
+        List.of(new Translation2d(1, 0)),
+        new Pose2d(10, 0, new Rotation2d(Math.PI)),
         config);
 }
