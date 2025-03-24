@@ -1,145 +1,146 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonUtils;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.common.hardware.VisionLEDMode;
-import org.photonvision.targeting.PhotonTrackedTarget;
-
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.estimator.PoseEstimator;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.LimelightHelpers.PoseEstimate;
+import swervelib.SwerveDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.measure.AngularVelocity;
 
-// import com.revrobotics.*;
-// import com.revrobotics.;
 
-public class VisionSubsystem extends SubsystemBase{
 
-    private final PhotonCamera leftLime = new PhotonCamera("Left Limelight");
+public class VisionSubsystem extends SubsystemBase {
+
+
+
+  double xSpeed;
+  double ySpeed;
+  double tangentSpeed;
+  double normalSpeed;
+
+  boolean hasTarget = false;
+
+  boolean isRed;
+  
+
+  LimelightHelpers limelightHelp;
+
+
+  /** Creates a new VisionSubsystem. */
+  public VisionSubsystem() {
+    LimelightHelpers.setLEDMode_ForceOff("limelight-left");
+    LimelightHelpers.setLEDMode_ForceOff("limelight-right");
+
+    // DIO_1 = new DigitalInput(1);
+
+
+    if (DriverStation.isFMSAttached()) {
+      if (DriverStation.getAlliance().isPresent()) {
+        isRed = DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
+      }
+    }
+
+
+  }
+
+  
+  public boolean getTV() {
+    return LimelightHelpers.getTV("Left Limelight");
+  }
+
+  public double getTX() {
+    return LimelightHelpers.getTX("Left Limelight");
+  }
+
+  public void updatePoseEstimator(SwerveDrive swerve) {
+    PoseEstimate  poseEst = getEstimatedGlobalPose("Left Limelight");
+      if (poseEst != null) {
+        swerve.addVisionMeasurement(poseEst.pose, poseEst.timestampSeconds);
+      }
+  }
+
+  /*called by drive and stuff*/
+  public void updatePosesEstimator(SwerveDrive swerve) {
+    double maxta = 0.4;
+    String camera = null;
+    String[] limelights = {"Left Limelight", "Right Limelight"}; // , "limelight-rear"
+    for (String limelight: limelights) {
+      if (LimelightHelpers.getTV(limelight) && LimelightHelpers.getTA(limelight) > maxta) {
+        maxta = LimelightHelpers.getTA(limelight);
+        camera = limelight;
+      }
+    }
+    if (camera != null) {
+      PoseEstimate poseEst = getEstimatedGlobalPose(camera);
+      swerve.addVisionMeasurement(poseEst.pose, poseEst.timestampSeconds);
+      hasTarget = true;
+    } else {
+      hasTarget = false;
+      
+    }
+    SmartDashboard.putBoolean("target??", hasTarget);
+  }
+
+
+  /**
+   * Building this out for hopefully a quick test. to try mega tag 2
+   * @param swerve
+   */
+  
     
-    private Transform3d BOTTOM_CAMERA_TO_CENTER = new Transform3d(
-        new Translation3d(VisionConstants.camXBottom, VisionConstants.camYBottom, VisionConstants.camZBottom), 
-        new Rotation3d(0,0,0));
-    private Transform3d TOP_CAMERA_TO_CENTER = new Transform3d(
-        new Translation3d(VisionConstants.camXTop, VisionConstants.camYTop, VisionConstants.camZTop), 
-        new Rotation3d(0,0,0));
+  public PoseEstimate getEstimatedGlobalPose(String limelight) {
+    if (LimelightHelpers.getTV(limelight)) {
+      hasTarget = true;
+      PoseEstimate poseEst = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight);
+     
+      SmartDashboard.putBoolean("limelightTV", LimelightHelpers.getTV(limelight));
+      SmartDashboard.putNumber("limelightXPosition", poseEst.pose.getX());
+      SmartDashboard.putNumber("limelightYPosition", poseEst.pose.getY());
+      return poseEst;
+    }
+    SmartDashboard.putBoolean("limelightTV", LimelightHelpers.getTV(limelight));
+    SmartDashboard.putNumber("limelightX", new PoseEstimate().pose.getX());
+    SmartDashboard.putNumber("limelightY", new PoseEstimate().pose.getY());
+    return new PoseEstimate(); 
+  }
+
+  public PoseEstimate[] getEstimatedGlobalPose(String[] limelights) {
+    PoseEstimate[] poseEsts = new PoseEstimate[limelights.length];
+    int num = 0;
+    for (String limelight : limelights) {
+      if (LimelightHelpers.getTV(limelight)) {
+        PoseEstimate poseEst = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight);
+        poseEsts[num] = poseEst;
+      }
+      else {
+        poseEsts[num] = null;
+      }
+      num++;
+    }
+    return poseEsts;
+     
+  }
     
-    // private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run   
+  }
 
-    // Construct PhotonPoseEstimator
-    // private PhotonPoseEstimator bottomPhotonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, BOTTOM_CAMERA_TO_CENTER);
-    // private PhotonPoseEstimator topPhotonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, TOP_CAMERA_TO_CENTER);
-
-    private SwerveDrivePoseEstimator botPoseEstimator;
-    private final Supplier<Rotation2d> botRotation2D;
-    private final Supplier<SwerveModulePosition[]> botModulePositions;
-
-    private double yaw;
-    private double pitch;
-    private double targetRange;
+  
+  
 
 
-    public VisionSubsystem(Supplier<Rotation2d> rotationSupplier,
-        Supplier<SwerveModulePosition[]> modulePositionSupplier) {
-    
-        this.botRotation2D = rotationSupplier;
-        this.botModulePositions = modulePositionSupplier;
-
-        botPoseEstimator = new SwerveDrivePoseEstimator(
-            DriveConstants.kDriveKinematics,
-            rotationSupplier.get(),
-            modulePositionSupplier.get(),
-            new Pose2d());
-
-        leftLime.setLED(VisionLEDMode.kDefault);
-    }
-
-    public void periodic() {
-        // SmartDashboard.putNumber("Left Camera Yaw Angle", getLeftAngles()[0]);
-        // SmartDashboard.putNumber("Left Camera Pitch Angle", getLeftAngles()[1]);
-        // SmartDashboard.putNumber("Left Camera To AprilTag Distance", getLeftAngles()[2]);
-
-        botPoseEstimator.update(botRotation2D.get(), botModulePositions.get());
-        
-    }
-
-    public PhotonTrackedTarget getBestTarget() {
-        var result = leftLime.getLatestResult();
-        if(result.hasTargets()) {
-            // Get a list of currently tracked targets.
-            return result.getBestTarget();
-        }
-        return null;
-    }
-
-    //Localization
-    // public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-    //     photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-    //     return photonPoseEstimator.update(bottomLime.getLatestResult());
-    // }
-
-    // public void update() {
-    //     final Optional<EstimatedRobotPose> bottomOptionalEstimatedPose = bottomPhotonPoseEstimator.update(leftLime.getLatestResult());
-    //     if (bottomOptionalEstimatedPose.isPresent()) {
-    //         final EstimatedRobotPose estimatedPose = bottomOptionalEstimatedPose.get();          
-    //         botPoseEstimator.addVisionMeasurement(estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds);
-    //     }
-
-    //     final Optional<EstimatedRobotPose> topOptionalEstimatedPose = topPhotonPoseEstimator.update(rightLime.getLatestResult());
-    //     if (topOptionalEstimatedPose.isPresent()) {
-    //         final EstimatedRobotPose estimatedPose = topOptionalEstimatedPose.get();          
-    //         botPoseEstimator.addVisionMeasurement(estimatedPose.estimatedPose.toPose2d(), estimatedPose.timestampSeconds);
-    //     }
-
-    //     botPoseEstimator.update(botRotation2D.get(), botModulePositions.get());
-    // }
-
-    // public Pose2d getCurrentPose() {
-    //     update();
-    //     return botPoseEstimator.getEstimatedPosition();
-    // }
-
-    // [0] = yaw, [1] = pitch
-    public double[] getLeftAngles() {
-        var results = leftLime.getAllUnreadResults();
-        if(!results.isEmpty()) {
-            var result = results.get(results.size() - 1);
-            if(result.hasTargets() && result.getBestTarget().pitch != 0) {
-                PhotonTrackedTarget bestTarget = result.getBestTarget();
-                // System.out.println(bestTarget.toString());
-                yaw = bestTarget.yaw;
-                pitch = bestTarget.pitch;
-                targetRange = PhotonUtils.calculateDistanceToTargetMeters(
-                                        0.333, // Measured with a tape measure, or in CAD.
-                                        0.174625, 
-                                        Units.degreesToRadians(Math.PI / 2), // Measured with a protractor, or in CAD.
-                                        Units.degreesToRadians(bestTarget.pitch));
-                // return new double[] {yaw, pitch};
-            }
-        } return new double[] {yaw, pitch, targetRange};
-    }
-
-} 
+}

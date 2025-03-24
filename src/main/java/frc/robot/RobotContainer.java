@@ -4,15 +4,17 @@
 
 package frc.robot;
 
+import java.io.File;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import javax.sound.midi.Sequencer;
 
 import org.ejml.dense.row.decompose.TriangularSolver_CDRM;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.hal.simulation.RoboRioDataJNI;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -40,24 +42,24 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.OuttakeConstants;
 import frc.robot.Constants.PivotConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.commands.AllForNaught;
-import frc.robot.commands.AprilAlignCmd;
-import frc.robot.commands.AutoAlign;
-import frc.robot.commands.DriveToPointCmd;
+// import frc.robot.commands.AprilAlignCmd;
+// import frc.robot.commands.AutoAlign;
+// import frc.robot.commands.DriveToPointCmd;
 import frc.robot.commands.ElevatorAutoCmd;
 //import frc.robot.Trajectories;
 import frc.robot.commands.ElevatorControllerCmd;
 import frc.robot.commands.PivotControllerCmd;
 //Auto Commands
-import frc.robot.commands.IntakeAutoCmd;
 import frc.robot.commands.IntakeControllerCmd;
-import frc.robot.commands.MoveToReefCmd;
+//import frc.robot.commands.MoveToReefCmd;
 import frc.robot.commands.OuttakeAutoCmd;
 import frc.robot.commands.OuttakeControllerCmd;
 import frc.robot.commands.RumbleCmd;
 import frc.robot.commands.SetElevatorCmd;
 import frc.robot.commands.SetPivotCmd;
-import frc.robot.commands.SwerveControllerCmd;
+//import frc.robot.commands.SwerveControllerCmd;
 //Subsystem Imports
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -66,85 +68,215 @@ import frc.robot.subsystems.OuttakeSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
 
- 
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+//import frc.robot.subsystems.ReefCentering;
+import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
+
+import swervelib.SwerveInputStream;
+import edu.wpi.first.hal.simulation.DriverStationDataJNI;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.PS4Controller.Button;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 
+import edu.wpi.first.wpilibj.DriverStation;
 
-/*
- * This class is where the bulk of the robot should be declared.  Since Command-based is a
+/**
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls).  Instead, the structure of the robot
- * (including subsystems, commands, and button mappings) should be declared here.
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems
-  private final DriveSubsystem robotDrive = new DriveSubsystem();
-  private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-  private final OuttakeSubsystem outtakeSubsystem = new OuttakeSubsystem();
-  private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-  private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
-  private final VisionSubsystem visionSubsystem = new VisionSubsystem(robotDrive::getRotation2d, robotDrive::getSwerveModulePositions);
+  // The robot's subsystems and commands are defined here...
+  private VisionSubsystem vision = new VisionSubsystem();
+  private final DriveSubsystem driveBase = new DriveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"), vision); // where to configure the robot or "choose" it
+  private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private OuttakeSubsystem outtakeSubsystem = new OuttakeSubsystem();
+  private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private PivotSubsystem pivotSubsystem = new PivotSubsystem();
+//  private ReefCentering reefCentering = new ReefCentering(driveBase, elevatorSubsystem);
 
+  private final SendableChooser<Command> autoChooser;
 
-  XboxController driverController = new XboxController(OIConstants.kDriverControllerPort);
-  XboxController operatorController = new XboxController(OIConstants.kSecondaryControllerPort);
   
- SendableChooser<Command> autoChooser = new SendableChooser<>();
 
 
+  // Replace with CommandPS4Controller or CommandJoystick if needed
+  private final CommandXboxController m_driverController =
+      new CommandXboxController(OIConstants.kDriverControllerPort);
 
-
-
+    private final CommandXboxController m_gunnerController =
+      new CommandXboxController(OIConstants.kSecondaryControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-  
-    // Configure default commands
+    DriverStation.silenceJoystickConnectionWarning(true);
 
-     
-    robotDrive.setDefaultCommand(
-        new SwerveControllerCmd(
-            robotDrive,
-            () -> driverController.getLeftY(),
-            () -> driverController.getLeftX(),
-            () -> driverController.getRightX(),
-            () -> true));
+    // Configure the trigger bindings
+    configureBindings();
+    configureNamedCommands();
 
-    intakeSubsystem.setDefaultCommand(
-      new IntakeControllerCmd(
-        intakeSubsystem, 
-        () -> 0.0, 
-        0));
-        
-    elevatorSubsystem.setDefaultCommand(
-      new ElevatorControllerCmd(
-        elevatorSubsystem, 
-        () -> operatorController.getRightTriggerAxis(),
-        () -> operatorController.getLeftTriggerAxis()));
+    Command goStraight = driveBase.driveToPoseRobotRelative(
+      new Pose2d(1, 0, new Rotation2d(0)), 
+      new PathConstraints(3, 3, 540, 720),
+      0.0);
 
-    outtakeSubsystem.setDefaultCommand(
-      new OuttakeControllerCmd(
-        outtakeSubsystem, 
-        () -> 0.0, 
-        () -> 0.0,
-        () -> true));
-
-    pivotSubsystem.setDefaultCommand(
-      new PivotControllerCmd(
-        pivotSubsystem, 
-        () -> 0.0, 
-        () -> 0.0));
+    SequentialCommandGroup manualStraightAuto = new SequentialCommandGroup(
+      driveBase.driveToDistanceCommand(2, 3),
+      new SetElevatorCmd(elevatorSubsystem, 4).withTimeout(1.5),
+      new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> false).withTimeout(0.5)
+    );
     
 
-    // robotDrive.zeroHeading();
+    autoChooser = AutoBuilder.buildAutoChooser("Backflip");
+    autoChooser.addOption("Manual Straight Auto", goStraight);
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+    
 
-    //lightingSubsystem.setDefaultCommand(lightingSubsystem.splitColor(Color.kAquamarine, Color.kDarkCyan));
+    
+    }
+
+    
+    SwerveInputStream driveAngularVelocity  = SwerveInputStream.of(driveBase.getSwerveDrive(),
+                                            () -> m_driverController.getLeftY() * driveBase.getYAxisInverted(), 
+                                            () -> m_driverController.getLeftX() * driveBase.getXAxisInverted())
+                                            .withControllerRotationAxis(() -> m_driverController.getRightX())
+                                            .deadband(0.1)
+                                            .scaleTranslation(0.8)
+                                            .allianceRelativeControl(true);
+
+    SwerveInputStream driveAngularVelocitySlow = driveAngularVelocity.copy().scaleTranslation(0.43);
+
+  
+    SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
+                                                            .withControllerHeadingAxis(m_driverController::getRightX, 
+                                                            m_driverController::getRightY).headingWhile(false);
+                                                          //withControllerHeadingAxis(m_driverController::getRightX, m_driverController::getRightX  <- change this to Y for special mode
+
+    SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
+                                                             .allianceRelativeControl(false);
+    SwerveInputStream driveRobotOrientedReefSpeed = driveRobotOriented.copy().scaleTranslation(0.2);
+
+    Command driveFieldOrientedDirectAngle = driveBase.driveFieldOriented(driveDirectAngle);
+    Command driveFieldOrientedAngularVelocity = driveBase.driveFieldOriented(driveAngularVelocity);
+    Command driveFieldOrientedAngularVelocitySlow = driveBase.driveFieldOriented(driveAngularVelocitySlow);
+    
+    Command driveRobotOrientedAngularVelocitySuperSlow = driveBase.driveFieldOriented(driveRobotOrientedReefSpeed);
+
+    
+
+    SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(driveBase.getSwerveDrive(),
+                                                () -> m_driverController.getLeftY() * driveBase.getYAxisInverted(),
+                                                () -> m_driverController.getLeftX() * driveBase.getXAxisInverted())
+                                                .withControllerRotationAxis(m_driverController::getRightX)
+                                                .deadband(0.1)
+                                                .scaleTranslation(0.8)
+                                                .allianceRelativeControl(true);
+    // Derive the heading axis with math!
+    SwerveInputStream driveDirectAngleSim     = driveAngularVelocitySim.copy()
+                                                                      .withControllerHeadingAxis(() -> Math.sin(
+                                                                                                      m_driverController.getRawAxis(
+                                                                                                          4) * Math.PI) * (Math.PI * 2),
+                                                                                                  () -> Math.cos(
+                                                                                                      m_driverController.getRawAxis(
+                                                                                                          4) * Math.PI) *
+                                                                                                        (Math.PI * 2))
+                                                                      .headingWhile(true);
+
+    Command driveFieldOrientedDirectAngleSim = driveBase.driveFieldOriented(driveDirectAngleSim);
+
+
+  /**
+   * Use this method to define your trigger->command mappings. Triggers can be created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * predicate, or via the named factories in {@link
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
+   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * joysticks}.
+   */
+  private void configureBindings() {
+
+      driveBase.setDefaultCommand(driveFieldOrientedAngularVelocity);
 
 
 
-    // Register Named Commands
-    // Named commands = commands other than driving around that still need to be executed in auto
+      m_driverController.start().onTrue(Commands.runOnce(driveBase::zeroGyro));
+      m_driverController.back().onTrue(new InstantCommand(() -> elevatorSubsystem.setElevatorPosition(ElevatorConstants.kMinElevatorPosition)));
 
+
+      m_driverController.leftStick().whileTrue(driveRobotOrientedAngularVelocitySuperSlow);
+      m_driverController.rightStick().whileTrue(driveFieldOrientedAngularVelocitySlow);
+      m_driverController.x().onTrue(Commands.runOnce(driveBase::zeroGyro));
+      m_driverController.leftBumper().toggleOnTrue(new AlignToReefTagRelative(false, driveBase));
+      m_driverController.rightBumper().toggleOnTrue(new AlignToReefTagRelative(true, driveBase));
+
+      m_driverController.leftTrigger().onTrue(new InstantCommand(() -> driveBase.invertXAxisJoystick()));
+      m_driverController.rightTrigger().onTrue(new InstantCommand(() -> driveBase.invertYAxisJoystick()));
+      
+     // m_driverController.leftBumper().whileTrue(reefCentering.createPathCommand(ReefCentering.Side.Left).until(() -> reefCentering.haveConditionsChanged()).repeatedly());
+     // m_driverController.rightBumper().whileTrue(reefCentering.createPathCommand(ReefCentering.Side.Right).until(() -> reefCentering.haveConditionsChanged()).repeatedly());
+
+      // m_driverController.povDown().whileTrue();
+      // m_driverController.povUp().whileTrue();
+      // m_driverController.povLeft().whileTrue(new CenterLimelightOnReef(driveBase, Reef.left));
+      // m_driverController.povRight().whileTrue(new CenterLimelightOnReef(driveBase, Reef.right));
+      m_gunnerController.axisGreaterThan(3, 0.4).whileTrue(new ElevatorControllerCmd(elevatorSubsystem,() -> true,() -> false));
+      m_gunnerController.axisGreaterThan(2, 0.4).whileTrue(new ElevatorControllerCmd(elevatorSubsystem,() -> false,() -> true));
+      
+
+
+      //Intaking coral
+      m_gunnerController.b().toggleOnTrue(new ParallelRaceGroup(
+        new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSlow, ()-> true),
+        new IntakeControllerCmd(intakeSubsystem, () -> IntakeConstants.kIntakeMotorSpeed, 1)));
+     
+      //Outtaking coral
+      m_gunnerController.a().whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> false), new IntakeControllerCmd(intakeSubsystem, () -> 0.6, 1) ));
+      
+      //Intaking algae
+      m_gunnerController.x().whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, ()-> false));
+      
+      //Outtaking algae
+      m_gunnerController.y().whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedSlow, () -> 0.0, ()-> false));
+      
+      //Manual pivot
+      m_gunnerController.leftStick().whileTrue(new PivotControllerCmd(pivotSubsystem, () -> 0.0, () -> 1.0));
+      m_gunnerController.rightStick().whileTrue(new PivotControllerCmd(pivotSubsystem, () -> 1.0, () -> 0.0));
+      
+      //Algae setpoints
+      m_gunnerController.leftBumper().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 3), new SetPivotCmd(pivotSubsystem, 1)));
+      m_gunnerController.rightBumper().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 2), new SetPivotCmd(pivotSubsystem, 1)));
+      m_gunnerController.start().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 0), new SetPivotCmd(pivotSubsystem, 2)));
+      
+      //Elevator setpoints
+      m_gunnerController.povUp().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 4), new SetPivotCmd(pivotSubsystem, 0)));
+      m_gunnerController.povLeft().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 3), new SetPivotCmd(pivotSubsystem, 0)));
+      m_gunnerController.povRight().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem,2), new SetPivotCmd(pivotSubsystem, 0)));
+      m_gunnerController.povDown().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 1), new SetPivotCmd(pivotSubsystem, 0)));
+    
+
+     
+  }
+
+  private void configureNamedCommands() {
     var pivotToUp = new SetPivotCmd(pivotSubsystem, 0).withTimeout(2);
     var pivotToDealgae = new SetPivotCmd(pivotSubsystem, 1).withTimeout(2);
     var pivotToProccessor = new SetPivotCmd(pivotSubsystem, 2).withTimeout(2);
@@ -154,10 +286,24 @@ public class RobotContainer {
     var elevatatorToL3 = new SetElevatorCmd(elevatorSubsystem, 3).withTimeout(1.5);
     var elevatatorToL4 = new SetElevatorCmd(elevatorSubsystem, 4).withTimeout(1.5);
 
-    var outtakeCoral = new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, ()->false).withTimeout(2.5);
-    var intake = new IntakeAutoCmd(intakeSubsystem, 1).withTimeout(2.5);
-    
+    var outtake = new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> false).withTimeout(0.75);
+    OuttakeAutoCmd intake = new OuttakeAutoCmd(outtakeSubsystem, intakeSubsystem, () -> true);
+    OuttakeAutoCmd intake2 = new OuttakeAutoCmd(outtakeSubsystem, intakeSubsystem, () -> true);
 
+    var alignReefLeft = new AlignToReefTagRelative(false, driveBase).withTimeout(1.7);
+    var alignReefRight = new AlignToReefTagRelative(true, driveBase).withTimeout(1.7);
+
+    var alignReefLeftLong = new AlignToReefTagRelative(false, driveBase).withTimeout(2.3);
+    var alignReefRightLong = new AlignToReefTagRelative(true, driveBase).withTimeout(2.3);
+
+    var invertDriverXJoysticks = new InstantCommand(() -> driveBase.invertXAxisJoystick());
+
+    var invertDriverYJoysticks = new InstantCommand(() -> driveBase.invertYAxisJoystick());
+
+    var invertDriverXYJoysticks = new ParallelCommandGroup(
+      new InstantCommand(() -> driveBase.invertXAxisJoystick()),
+      new InstantCommand(() -> driveBase.invertYAxisJoystick())
+    );
 
     //Named Commands for PathPlanner
     NamedCommands.registerCommand("Pivot To Up", pivotToUp);
@@ -170,194 +316,19 @@ public class RobotContainer {
     NamedCommands.registerCommand("Elevator To L4", elevatatorToL4);
 
     NamedCommands.registerCommand("Intake", intake);
-    NamedCommands.registerCommand("Outtake Coral", outtakeCoral);
+    NamedCommands.registerCommand("Intake 2", intake2);
+    NamedCommands.registerCommand("Outtake", outtake);
 
+    NamedCommands.registerCommand("Align Reef Left", alignReefLeft);
+    NamedCommands.registerCommand("Align Reef Right", alignReefRight);
 
-    // Configure the button bindings
-    configureButtonBindings();
+    NamedCommands.registerCommand("Align Reef Left Long", alignReefLeftLong);
+    NamedCommands.registerCommand("Align Reef Right Long", alignReefRightLong);
 
-
-    // var pivotAutoOuttake = new SequentialCommandGroup(
-    //   new SetPivotCmd(pivotSubsystem, 0).withTimeout(0.2),
-    //   new PivotControllerCmd(pivotSubsystem).withTimeout(1.3)).withTimeout(1.5);
-
-    // var elevatorAutoOuttake = new SequentialCommandGroup(
-    //   new SetElevatorCmd(elevatorSubsystem, 0).withTimeout(0.2),
-    //   new ElevatorControllerCmd(elevatorSubsystem, () -> false, () -> false).withTimeout(1.3)).withTimeout(1.5);
-
-
-    //Parallel elevator and pivot for auto
-    // var pivotElevatorAutoOuttake = new ParallelCommandGroup(pivotAutoOuttake, elevatorAutoOuttake);
-
-
-
-   
-
-    SequentialCommandGroup goStraight = robotDrive.AutoCommandFactory(Trajectories.goStraight);
-    SequentialCommandGroup goStraightTurn = robotDrive.AutoCommandFactory(Trajectories.goStraightTurn);
-
-
-     var pullThePinStraight = new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1.5);
+    NamedCommands.registerCommand("Invert X Joystick", invertDriverXJoysticks);
+    NamedCommands.registerCommand("Invert Y Joystick", invertDriverYJoysticks);
+    NamedCommands.registerCommand("Invert Driver Joysticks", invertDriverXYJoysticks);
     
-     //From Drivers' perspective, robot starts to their right
-     SequentialCommandGroup pullThePinStraightTurnRight = new SequentialCommandGroup(
-      new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1),
-      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> -DriveConstants.kSlowDriveCoefficient, () -> false).withTimeout(1.5));
-    
-    SequentialCommandGroup pullThePinStraightTurnLeft = new SequentialCommandGroup(
-      new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1),
-      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> false).withTimeout(1.5));
-
-     SequentialCommandGroup pullThePinL4 = new SequentialCommandGroup(
-      new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2),
-      new MoveToReefCmd(robotDrive, visionSubsystem).withTimeout(2),
-      new ElevatorAutoCmd(elevatorSubsystem, 4).withTimeout(2.5),
-      new OuttakeAutoCmd(outtakeSubsystem,() -> 0.6, () -> 0.0).withTimeout(2),
-      new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1),
-      new ElevatorAutoCmd(elevatorSubsystem, 1).withTimeout(3),
-      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> false).withTimeout(2));
-
-    SequentialCommandGroup pullThePinL2 = new SequentialCommandGroup(
-      new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(2),
-      new MoveToReefCmd(robotDrive, visionSubsystem).withTimeout(2),
-      new ElevatorAutoCmd(elevatorSubsystem, 2).withTimeout(2.5),
-      new OuttakeAutoCmd(outtakeSubsystem,() -> 0.6, () -> 0.0).withTimeout(2),
-      new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false).withTimeout(1),
-      new ElevatorAutoCmd(elevatorSubsystem, 1).withTimeout(3),
-      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> false).withTimeout(2));
-
-  //  autoChooser.addOption("Nothing", null);
-   
-  //  autoChooser.addOption("Straight and Turn Auto", goStraightTurn);
-
-
-   autoChooser = AutoBuilder.buildAutoChooser();
-   autoChooser.addOption("Trajectory Straight Auto", goStraight);
-   autoChooser.addOption("Trajectory Straight Turn Auto", goStraightTurn);
-   autoChooser.addOption("Pull The Pin Straight", pullThePinStraight);
-   autoChooser.addOption("Pull The Pin Straight Turn Right", pullThePinStraightTurnRight);
-   autoChooser.addOption("Pull The Pin Straight Turn Left", pullThePinStraightTurnLeft);
-   autoChooser.addOption("Pull The Pin L4", pullThePinL4);
-   autoChooser.addOption("Pull The Pin L2", pullThePinL2);
-   SmartDashboard.putData("Auto Chooser", autoChooser);
-
-  }
- 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling passing it to a
-   * {@link JoystickButton}.
-   */
-  private void configureButtonBindings() {
-
-   // SmartDashboard.putData("Straight Auto", new PathPlannerAuto("Straight Auto"));
-    //SmartDashboard.putData("Example Auto", new PathPlannerAuto("Example Auto"));
-
-
-
-    // //Auto-align
-    // new JoystickButton(driverController, Buttons.A).whileTrue(new AutoAlign(robotDrive, visionSubsystem));
-
-    
-    //Intake coral into arm
-    new JoystickButton(operatorController, Buttons.B).toggleOnTrue(new ParallelRaceGroup(
-      new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSlow, ()-> true),
-      new IntakeControllerCmd(intakeSubsystem, () -> IntakeConstants.kIntakeMotorSpeed, 1)));
-
-    //Outtake coral from arm
-    new JoystickButton(operatorController, Buttons.A).whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> false), new IntakeControllerCmd(intakeSubsystem, () -> 0.6, 1) ));
-
-    //Intake algae
-    new JoystickButton(operatorController, Buttons.X).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, ()->false));
-
-    //Outtake algae
-    new JoystickButton(operatorController, Buttons.Y).whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> 0.0, ()->false));
-
-    //Pivot up
-    new JoystickButton(operatorController, Buttons.R3).whileTrue(new PivotControllerCmd(pivotSubsystem, () -> 1.0, () -> 0.0));
-
-    //Pivot down
-    new JoystickButton(operatorController, Buttons.L3).whileTrue(new PivotControllerCmd(pivotSubsystem, () -> 0.0, () -> 1.0));
-
-    //Pivot to up (coral)
-    new JoystickButton(operatorController, Buttons.Maria).whileTrue(new SetPivotCmd(pivotSubsystem, 0));
-
-
-
-    //Pivot to up position (coral)
-    new JoystickButton(operatorController, Buttons.RB).whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 3), new SetPivotCmd(pivotSubsystem, 1)));
-
-    //Pivot to middle position (reef)
-    new JoystickButton(operatorController, Buttons.Menu).whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 0), new SetPivotCmd(pivotSubsystem, 2)));
-
-    //Pivot to down position (processor)
-    new JoystickButton(operatorController, Buttons.LB).whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 2), new SetPivotCmd(pivotSubsystem, 1)));
-
-    
-    
-
-   
-
-    //Elevator to L4 position
-    new POVButton(operatorController, Buttons.UP_ARR).whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 4), new SetPivotCmd(pivotSubsystem, 0)));
-    
-    //Elevator to L3 position
-    new POVButton(operatorController, Buttons.LEFT_ARR).whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 3), new SetPivotCmd(pivotSubsystem, 0)));
-
-    //Elevator to L2 position
-    new POVButton(operatorController, Buttons.RIGHT_ARR).whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 2), new SetPivotCmd(pivotSubsystem, 0)));
-
-    //Elevator to L1 position
-    new POVButton(operatorController, Buttons.DOWN_ARR).whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 1), new SetPivotCmd(pivotSubsystem, 0)));
-    
-
-
-
-
-
-
-
-
-    // //Rumble controllers
-    // new JoystickButton(driverController, Buttons.Maria).whileTrue(new RumbleCmd(operatorController, 1, 1.00));
-    // new JoystickButton(operatorController, Buttons.L3).whileTrue(new RumbleCmd(driverController, 1, 1.00));
-    // new JoystickButton(operatorController, Buttons.R3).whileTrue(new RumbleCmd(driverController, 2, 1.00));
-
-
-
-    //Zero Heading
-    new JoystickButton(driverController, Buttons.X).toggleOnTrue(new AllForNaught(robotDrive));
-
-    //Reset pivot position (pivot must be all the way down)
-    new JoystickButton(driverController, Buttons.Y).onTrue(new InstantCommand(() -> pivotSubsystem.setPivotPosition(6.5)));
-
-    //Reset elevator position (elevator must be all the way down)
-    new JoystickButton(driverController, Buttons.B).onTrue(new InstantCommand(() -> elevatorSubsystem.setElevatorPosition(ElevatorConstants.kMinElevatorPosition)));
-
-    //TEST Drive to point (ID 9)
-    // new JoystickButton(driverController, Buttons.Menu).whileTrue(new DriveToPointCmd(robotDrive, visionSubsystem, 
-    //   () -> VisionConstants.kAprilTags[visionSubsystem.getBestTarget().fiducialId - 1], () -> visionSubsystem.getCurrentPose()));
-
-    // //TEST Drive autoaligncmd
-    //new JoystickButton(driverController, Buttons.A).whileTrue(new AutoAlign(robotDrive, visionSubsystem,() -> driverController.getLeftY(),() -> driverController.getLeftX(),() -> false));
-
-    // TEST Drive MoveToReefCmd
-    new JoystickButton(driverController, Buttons.LB).whileTrue(visionSubsystem.getBestTarget() == null ?
-      new SwerveControllerCmd(robotDrive, () -> 0.0, () -> 0.0, () -> 0.0, () -> false) :
-      new MoveToReefCmd(robotDrive, visionSubsystem));
-    
-    //Slow drive with d-pad
-    new POVButton(driverController, Buttons.UP_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false));
-    new POVButton(driverController, Buttons.DOWN_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> 0.0, () -> false));
-    new POVButton(driverController, Buttons.LEFT_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> 0.0, () -> -DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false));
-    new POVButton(driverController, Buttons.RIGHT_ARR).whileTrue(new SwerveControllerCmd(robotDrive, () -> 0.0, () -> DriveConstants.kSlowDriveCoefficient, () -> 0.0, () -> false));
-
-    //POSE TESTING
-    new JoystickButton(driverController, Buttons.A).whileTrue(new SwerveControllerCmd(robotDrive, () -> 0.55 * (1 - robotDrive.getPose().getX()), () -> 0.0, () -> 0.0, () -> true));
-
-
-   // -----------------------------------------------new JoystickButton(driverController, Buttons.B).onTrue(new InstantCommand(() -> robotDrive.resetEncoders()));
   }
 
   /**
@@ -366,20 +337,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-
+    
     return autoChooser.getSelected();
-    // return the autonomous command given by the drop-down selector in ShuffleBoard
-  //  try{
-  //       // Load the path you want to follow using its name in the GUI
-  //       PathPlannerPath path = PathPlannerPath.fromPathFile("Straight Path");
-
-  //       // Create a path following command using AutoBuilder. This will also trigger event markers.
-  //       return AutoBuilder.followPath(path);
-  //   } catch (Exception e) {
-  //       DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
-  //       return Commands.none();
-  //   }
 
   }
-
 }

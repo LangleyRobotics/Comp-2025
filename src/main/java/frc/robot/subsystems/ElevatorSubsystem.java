@@ -93,6 +93,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
 
     public void periodic() {
+        pidElev();
         SmartDashboard.putNumber("Elevator Talon Position", elevatorMotorRight.getPosition().getValueAsDouble());
         // SmartDashboard.putNumber("Elevator Talon Voltage", elevatorMotorLeft.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Elevator Goal Position", goal);

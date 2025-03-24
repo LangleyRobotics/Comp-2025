@@ -127,6 +127,9 @@ public final class Constants {
     public static final double botMass = 55.792; // in kg
     public static final double botMOI = 4.27224; // kg * m^2
 
+    public static final boolean xAxisDriveReversedJoystick = true; //left and right
+    public static final boolean yAxisDriveReversedJoystick = false; //front and back
+
   }
 
   //ID Numbers for Xbox controller buttons
@@ -180,6 +183,22 @@ public final class Constants {
     public static final double maxDriveVelocityMPS = 9.4; //TEST BC I DON'T KNOW THE REAL NUMBER
 
     public static final double sensorToMechanismRatio = 22.55;
+      // Chassis configuration
+    // Distance between centers of right and left wheels on robot
+    public static final double kTrackWidth = Units.inchesToMeters(26);
+    // Distance between front and back wheels on robot
+    public static final double kWheelBase = Units.inchesToMeters(26);
+    public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+        new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+        new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+        new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+        new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+
+   
+  }
+  public static final class Limits{
+    public static final double maximumSpeed = 3.353;
+    public static final double PATHPLANNER_MAX_SPEED = 3.353 / 2;
   }
 
   public static final class OIConstants {
@@ -255,7 +274,7 @@ public final class Constants {
     public static final double lowAlgae = 13.70;
     public static final double l3 = 39.22;
     public static final double highAlgae = 40.72;
-    public static final double l4 = 82.9;
+    public static final double l4 = 83.5;
 
     public static final double kElevatorOffset = 0;
     public static final double disPerRot = 360; 
@@ -376,6 +395,24 @@ public final class Constants {
     public static final double camXTop = -0.34; //-0.173
     public static final double camYTop = 0.165; //0.358
     public static final double camZTop = 0.6096; //0.617-0.0444444
+
+    public static final double X_REEF_ALIGNMENT_P = 2.7;
+    public static final double Y_REEF_ALIGNMENT_P = 2.3;
+    public static final double ROT_REEF_ALIGNMENT_P = 0.05;
+
+    public static final double X_SETPOINT_REEF_ALIGNMENT_LEFT = -0.23;
+    public static final double X_SETPOINT_REEF_ALIGNMENT_RIGHT = -0.24;
+    public static final double Y_SETPOINT_REEF_ALIGNMENT_LEFT = -0.43;
+    public static final double Y_SETPOINT_REEF_ALIGNMENT_RIGHT = 0.41;
+    public static final double ROT_SETPOINT_REEF_ALIGNMENT_LEFT = 40.5;
+    public static final double ROT_SETPOINT_REEF_ALIGNMENT_RIGHT = -39.8;
+
+    public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.025;
+    public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.025;
+    public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.5;
+
+    public static final double DONT_SEE_TAG_WAIT_TIME = 5.0;
+    public static final double POSE_VALIDATION_TIME = 5.0;
 
     public static final double kDeadband = 0.001;
 

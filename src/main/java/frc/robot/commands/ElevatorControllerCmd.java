@@ -16,11 +16,11 @@ import frc.robot.MathMethods;
 public class ElevatorControllerCmd extends Command {
   
   private final ElevatorSubsystem elevatorSubsystem;
-  private final Supplier<Double> elevatorPositiveDirFunction;
-  private final Supplier<Double> elevatorNegativeDirFunction;
+  private final Supplier<Boolean> elevatorPositiveDirFunction;
+  private final Supplier<Boolean> elevatorNegativeDirFunction;
 
   
-  public ElevatorControllerCmd(ElevatorSubsystem elevatorSubsystem, Supplier<Double> elevatorPositiveDirFunction, Supplier<Double> elevatorNegativeDirFunction) {
+  public ElevatorControllerCmd(ElevatorSubsystem elevatorSubsystem, Supplier<Boolean> elevatorPositiveDirFunction, Supplier<Boolean> elevatorNegativeDirFunction) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.elevatorPositiveDirFunction = elevatorPositiveDirFunction;
     this.elevatorNegativeDirFunction = elevatorNegativeDirFunction;
@@ -36,18 +36,18 @@ public class ElevatorControllerCmd extends Command {
   public void execute() {
     
     //are the buttons pressed
-    double positiveDir = elevatorPositiveDirFunction.get();
-    double negativeDir = elevatorNegativeDirFunction.get();
+    boolean positiveDir = elevatorPositiveDirFunction.get();
+    boolean negativeDir = elevatorNegativeDirFunction.get();
 
     double velocity = 0;
     // if (!elevatorSubsystem.getMoveForward()){
     elevatorSubsystem.pidElev();
     // }
 
-    if(positiveDir > 0){
+    if(positiveDir){
       elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() + 0.4);
     }
-    else if(negativeDir > 0){
+    else if(negativeDir){
       elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() - 0.4);
     }
 

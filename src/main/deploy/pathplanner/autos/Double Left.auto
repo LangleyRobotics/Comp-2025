@@ -1,0 +1,103 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Start to E"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Align Reef Right Long"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator To L4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.65
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator To L1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.4
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "E to Source"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Source to C"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Align Reef Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator To L4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.62
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Invert Driver Joysticks"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

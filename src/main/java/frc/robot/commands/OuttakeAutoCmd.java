@@ -7,23 +7,26 @@ package frc.robot.commands;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.OuttakeConstants;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.OuttakeSubsystem;
 
 /** Add your docs here. */
 public class OuttakeAutoCmd extends Command{
     
     private final OuttakeSubsystem outtakeSubsystem;
-    private final Supplier<Double> outtakePositiveDirFunction;
-    private final Supplier<Double> outtakeNegativeDirFunction;
+    private final IntakeSubsystem intakeSubsystem;
+    private final Supplier<Boolean> intaking;
   
   
-    public OuttakeAutoCmd(OuttakeSubsystem outtakeSubsystem,
-    Supplier<Double> outtakePositiveDirFunction, Supplier<Double> outtakeNegativeDirFunction) {
+    public OuttakeAutoCmd(OuttakeSubsystem outtakeSubsystem, IntakeSubsystem intakeSubsystem,
+    Supplier<Boolean> intaking) {
       this.outtakeSubsystem = outtakeSubsystem;
-      this.outtakePositiveDirFunction = outtakePositiveDirFunction;
-      this.outtakeNegativeDirFunction = outtakeNegativeDirFunction;
+      this.intakeSubsystem = intakeSubsystem;
+      this.intaking = intaking;
   
-      addRequirements(outtakeSubsystem);
+      addRequirements(outtakeSubsystem, intakeSubsystem);
     }
   
   
@@ -35,11 +38,13 @@ public class OuttakeAutoCmd extends Command{
   
     @Override
     public void execute() {
-        if(outtakeNegativeDirFunction.get() > 0){
-            outtakeSubsystem.setOuttakeMotor(-outtakeNegativeDirFunction.get());
-        } else if(outtakePositiveDirFunction.get() > 0){
-            outtakeSubsystem.setOuttakeMotor(outtakePositiveDirFunction.get());
-        }
+      if(intaking.get()) {
+        intakeSubsystem.setIntakeMotor(IntakeConstants.kIntakeMotorSpeed);
+        outtakeSubsystem.setOuttakeMotor(OuttakeConstants.kOuttakeMotorSpeedSlow);
+      } else {
+        outtakeSubsystem.setOuttakeMotor(OuttakeConstants.kOuttakeMotorSpeedFast);
+      }
+
     }
       
     
@@ -48,12 +53,14 @@ public class OuttakeAutoCmd extends Command{
     @Override
     public void end(boolean interrupted) {
       outtakeSubsystem.stopOuttakeMotor();
+      intakeSubsystem.stopIntakeMotor();
     }
   
   
     @Override
     public boolean isFinished() {
-      return false;
+      return (intaking.get() && outtakeSubsystem.getAllGood()) || 
+             (!intaking.get() && !outtakeSubsystem.getAllGood());
     }
   }
   

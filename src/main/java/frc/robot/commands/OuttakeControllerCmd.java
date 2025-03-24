@@ -78,15 +78,13 @@ public class OuttakeControllerCmd extends Command{
 
   @Override
   public void end(boolean interrupted) {
-    if(intaking.get()) {
-      new WaitCommand(200);
-    }
     outtakeSubsystem.stopOuttakeMotor();
   }
 
 
   @Override
   public boolean isFinished() {
-    return (intaking.get() && outtakeSubsystem.getAllGood());
+    return (intaking.get() && outtakeSubsystem.getAllGood()) ||
+           (!intaking.get() && outtakeNegativeDirFunction.get() == 0.0 && outtakeSubsystem.getMoveForward());
   }
 }
