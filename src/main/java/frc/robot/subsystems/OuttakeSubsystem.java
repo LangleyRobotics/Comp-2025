@@ -16,6 +16,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OuttakeConstants;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -101,6 +102,14 @@ public class OuttakeSubsystem extends SubsystemBase {
     }
     public boolean getMoveForward(){
         return moveForward;
+    }
+
+    public Command backupCoral() {
+        return run(() -> {
+            if(!moveForward) {
+                setOuttakeMotor(0.05);
+            }
+        });
     }
 
 }

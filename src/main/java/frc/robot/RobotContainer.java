@@ -252,19 +252,21 @@ public class RobotContainer {
       m_gunnerController.a().whileTrue(new ParallelCommandGroup(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> false), new IntakeControllerCmd(intakeSubsystem, () -> 0.6, 1) ));
       
       //Intaking algae
-      m_gunnerController.x().whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, ()-> false));
+      m_gunnerController.x().whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSuperFast, ()-> false));
       
       //Outtaking algae
-      m_gunnerController.y().whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedSlow, () -> 0.0, ()-> false));
+      m_gunnerController.y().whileTrue(new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedSuperSlow, () -> 0.0, ()-> false));
       
       //Manual pivot
       m_gunnerController.leftStick().whileTrue(new PivotControllerCmd(pivotSubsystem, () -> 0.0, () -> 1.0));
       m_gunnerController.rightStick().whileTrue(new PivotControllerCmd(pivotSubsystem, () -> 1.0, () -> 0.0));
       
       //Algae setpoints
-      m_gunnerController.leftBumper().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 3), new SetPivotCmd(pivotSubsystem, 1)));
-      m_gunnerController.rightBumper().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 2), new SetPivotCmd(pivotSubsystem, 1)));
+      //m_gunnerController.leftBumper().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 5), new SetPivotCmd(pivotSubsystem, 1)));
+      //m_gunnerController.rightBumper().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 6), new SetPivotCmd(pivotSubsystem, 1)));
       m_gunnerController.start().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 0), new SetPivotCmd(pivotSubsystem, 2)));
+      m_gunnerController.rightBumper().onTrue(new SequentialCommandGroup(new SetElevatorCmd(elevatorSubsystem, 1),new ParallelCommandGroup( new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSuperFast, ()-> false).withTimeout(2.5),new SequentialCommandGroup(new WaitCommand(0.4),  new SetPivotCmd(pivotSubsystem, 1),new WaitCommand(0.4),new SetElevatorCmd(elevatorSubsystem,2),new SetPivotCmd(pivotSubsystem, 0)))));
+      m_gunnerController.leftBumper().onTrue(new SequentialCommandGroup(new SetElevatorCmd(elevatorSubsystem, 2),new ParallelCommandGroup( new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSuperFast, ()-> false).withTimeout(2.5),new SequentialCommandGroup(new WaitCommand(0.4),  new SetPivotCmd(pivotSubsystem, 1),new WaitCommand(0.4),new SetElevatorCmd(elevatorSubsystem,3),new SetPivotCmd(pivotSubsystem, 0)))));
       
       //Elevator setpoints
       m_gunnerController.povUp().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 4), new SetPivotCmd(pivotSubsystem, 0)));
@@ -272,14 +274,12 @@ public class RobotContainer {
       m_gunnerController.povRight().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem,2), new SetPivotCmd(pivotSubsystem, 0)));
       m_gunnerController.povDown().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 1), new SetPivotCmd(pivotSubsystem, 0)));
     
-
      
   }
 
   private void configureNamedCommands() {
-    var pivotToUp = new SetPivotCmd(pivotSubsystem, 0).withTimeout(2);
-    var pivotToDealgae = new SetPivotCmd(pivotSubsystem, 1).withTimeout(2);
-    var pivotToProccessor = new SetPivotCmd(pivotSubsystem, 2).withTimeout(2);
+    var pivotToUp = new SetPivotCmd(pivotSubsystem, 0).withTimeout(1.5);
+    var pivotToDealgae = new SetPivotCmd(pivotSubsystem, 1).withTimeout(1.5);
 
     var elevatatorToL1 = new SetElevatorCmd(elevatorSubsystem, 1).withTimeout(1.5);
     var elevatatorToL2 = new SetElevatorCmd(elevatorSubsystem, 2).withTimeout(1.5);
@@ -308,7 +308,6 @@ public class RobotContainer {
     //Named Commands for PathPlanner
     NamedCommands.registerCommand("Pivot To Up", pivotToUp);
     NamedCommands.registerCommand("Pivot To Dealgae", pivotToDealgae);
-    NamedCommands.registerCommand("Pivot To Processor", pivotToProccessor);
 
     NamedCommands.registerCommand("Elevator To L1", elevatatorToL1);
     NamedCommands.registerCommand("Elevator To L2", elevatatorToL2);

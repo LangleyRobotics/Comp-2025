@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -78,6 +79,9 @@ public class OuttakeControllerCmd extends Command{
 
   @Override
   public void end(boolean interrupted) {
+    // if(outtakeSubsystem.getAllGood() && !outtakeSubsystem.getMoveForward()) {
+    //   andThen(outtakeSubsystem.backupCoral());
+    // }
     outtakeSubsystem.stopOuttakeMotor();
   }
 

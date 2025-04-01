@@ -128,7 +128,7 @@ public final class Constants {
     public static final double botMOI = 4.27224; // kg * m^2
 
     public static final boolean xAxisDriveReversedJoystick = true; //left and right
-    public static final boolean yAxisDriveReversedJoystick = false; //front and back
+    public static final boolean yAxisDriveReversedJoystick = true; //front and back
 
   }
 
@@ -214,8 +214,11 @@ public final class Constants {
 
   public static final class OuttakeConstants {
     public static final int kOuttakeMotorPort = 9;
+    public static final double kOuttakeMotorSpeedSuperFast = 0.99;
     public static final double kOuttakeMotorSpeedFast = 0.8;
     public static final double kOuttakeMotorSpeedSlow = 0.4;
+    public static final double kOuttakeMotorSpeedSuperSlow = 0.2;
+    public static final double kOuttakeMotorSpeedAuto = 0.3;
   }
 
   public static final class PivotConstants {
@@ -227,21 +230,16 @@ public final class Constants {
     public static final double kPivotDefaultMotorSpeed = -0.15;
 
     //Pivot Positions
-    public static final double kMaxPivotPosition = 6.5;
-    public static final double kReefPivotPosition = 4.88;
-    public static final double kMinPivotPosition = -0.2;
+    public static final double kMaxPivotPosition = 9;
+    public static final double kReefPivotPosition = 8;
+    public static final double kMinPivotPosition = -0.1;
 
     public static final double kPivotOffset = 181;
     public static final double disPerRot = 360;
     public static final double pivotCompensation = 0.08;
     public static final double kPivotEncoderBreakpoint = 0.5;
 
-    public static final double kS_Pivot = 0.0;
-    public static final double kG_Pivot = 0;
-    public static final double kV_Pivot = 0;
-    public static final double kA_Pivot = 0;
-
-    public static final double kP_Pivot = 1;
+    public static final double kP_Pivot = 5;
     public static final double kI_Pivot = 0.0;
     public static final double kD_Pivot = 0.0;
 
@@ -263,32 +261,31 @@ public final class Constants {
     public static final int kElevatorMotorLeftPort = 12;
     public static final double kElevatorMotorSpeed = 0.8; //value from 0-1
     public static final double kElevatorMotorAccel = 0.5;
-    public static final double deadbandAngle = 0.1;
+    public static final double deadbandAngle = 5*0.1/12;
 
-    public static final double kMaxElevatorPosition = 86.4;
-    public static final double kMinElevatorPosition = 0;
-    public static final double upRightElevatorPosition = 0;
-    public static final double scoringPosition = 0;
-    public static final double l1 = 0.0; //change when robot is built
-    public static final double l2 = 12.20;
-    public static final double lowAlgae = 13.70;
-    public static final double l3 = 39.22;
-    public static final double highAlgae = 40.72;
-    public static final double l4 = 83.5;
+    public static final double kMaxElevatorPosition = 5*86.4/12;
+    public static final double kMinElevatorPosition = 5*0/12;
+    public static final double upRightElevatorPosition = 5*0/12;
+    public static final double scoringPosition = 5*0/12;
+    public static final double l1 = 5*0.0/12; //change when robot is built
+    public static final double l2 = 5*13.80/12;
+    public static final double lowAlgae = 0;
+    public static final double l3 = 5*40.82/12;
+    public static final double highAlgae = 15;
+    public static final double l4 = 5*85/12;
 
     public static final double kElevatorOffset = 0;
     public static final double disPerRot = 360; 
-    public static final double elevatorCompensation = 0.035;
-    public static final double kElevatorEncoderBreakpoint = 0.5;
+   
 
-    public static final double kS_Elevator = 0;
-    public static final double kG_Elevator = 0;
-    public static final double kV_Elevator = 0;
-    public static final double kA_Elevator = 0;
+// works but slow
+    // public static final double kP_Elevator = 3.07;
+    // public static final double kI_Elevator = 0.0;
+    // public static final double kD_Elevator = 0.00055; 
 
-    public static final double kP_Elevator = 0.8;
+    public static final double kP_Elevator = 2.75;
     public static final double kI_Elevator = 0.0;
-    public static final double kD_Elevator = 0.0;
+    public static final double kD_Elevator = 0.0; 
   } 
   
   public static final class IntakeConstants {

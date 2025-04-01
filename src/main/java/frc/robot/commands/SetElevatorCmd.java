@@ -38,7 +38,7 @@ public class SetElevatorCmd extends Command {
         this.targetPosition = ElevatorConstants.highAlgae;
     }
     else if (position == 9){
-    this.targetPosition = 82.8;
+    this.targetPosition = 82.8/3;
     } else {
       this.targetPosition = ElevatorConstants.kMinElevatorPosition;
     }

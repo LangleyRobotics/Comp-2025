@@ -21,10 +21,10 @@ public class SetPivotCmd extends Command {
     this.position = position;
 
     if(position == 0) {
-      //Up (coral)
+      //Vertical up
       this.targetPosition = PivotConstants.kMinPivotPosition;
     } else if (position == 1) {
-      //Middle (reef)
+      //Dealgae
       this.targetPosition = PivotConstants.kReefPivotPosition;
     } else if (position == 2) {
       //Down (processor)

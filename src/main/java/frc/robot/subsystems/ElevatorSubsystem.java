@@ -20,23 +20,17 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.PIDSubsystem;
-import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.*;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.Constants.PivotConstants;
 import frc.robot.MathMethods;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -54,7 +48,6 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final TalonFX elevatorMotorRight = new TalonFX(ElevatorConstants.kElevatorMotorRightPort);
     private final TalonFX elevatorMotorLeft = new TalonFX(ElevatorConstants.kElevatorMotorLeftPort);
 
-    private final ElevatorFeedforward elevatorFeedForward = new ElevatorFeedforward(ElevatorConstants.kS_Elevator, ElevatorConstants.kG_Elevator, ElevatorConstants.kV_Elevator, ElevatorConstants.kA_Elevator);
     private final PIDController elevatorPIDController = new PIDController(ElevatorConstants.kP_Elevator, ElevatorConstants.kI_Elevator, ElevatorConstants.kD_Elevator);
     private final ProfiledPIDController profiledPIDController = new ProfiledPIDController(
         ElevatorConstants.kP_Elevator,

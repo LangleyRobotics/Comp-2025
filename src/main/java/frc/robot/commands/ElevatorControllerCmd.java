@@ -45,10 +45,10 @@ public class ElevatorControllerCmd extends Command {
     // }
 
     if(positiveDir){
-      elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() + 0.4);
+      elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() + 0.2);
     }
     else if(negativeDir){
-      elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() - 0.4);
+      elevatorSubsystem.setGoal(elevatorSubsystem.getGoal() - 0.2);
     }
 
     

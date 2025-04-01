@@ -11,21 +11,28 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Align Reef Left"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Elevator To L4"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Align Reef Left"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Elevator To L4"
+                }
+              }
+            ]
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.62
+            "waitTime": 1.0
           }
         },
         {
