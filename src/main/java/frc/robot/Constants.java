@@ -397,11 +397,11 @@ public final class Constants {
     public static final double Y_REEF_ALIGNMENT_P = 2.3;
     public static final double ROT_REEF_ALIGNMENT_P = 0.05;
 
-    public static final double X_SETPOINT_REEF_ALIGNMENT_LEFT = -0.23;
+    public static final double X_SETPOINT_REEF_ALIGNMENT_LEFT = -0.225;
     public static final double X_SETPOINT_REEF_ALIGNMENT_RIGHT = -0.24;
-    public static final double Y_SETPOINT_REEF_ALIGNMENT_LEFT = -0.43;
-    public static final double Y_SETPOINT_REEF_ALIGNMENT_RIGHT = 0.41;
-    public static final double ROT_SETPOINT_REEF_ALIGNMENT_LEFT = 40.5;
+    public static final double Y_SETPOINT_REEF_ALIGNMENT_LEFT = -0.44;
+    public static final double Y_SETPOINT_REEF_ALIGNMENT_RIGHT = 0.453;
+    public static final double ROT_SETPOINT_REEF_ALIGNMENT_LEFT = 38;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT_RIGHT = -39.8;
 
     public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.025;

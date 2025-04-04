@@ -266,8 +266,28 @@ public class RobotContainer {
       //m_gunnerController.leftBumper().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 5), new SetPivotCmd(pivotSubsystem, 1)));
       //m_gunnerController.rightBumper().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 6), new SetPivotCmd(pivotSubsystem, 1)));
       m_gunnerController.start().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 0), new SetPivotCmd(pivotSubsystem, 2)));
-      m_gunnerController.rightBumper().onTrue(new SequentialCommandGroup(new SetElevatorCmd(elevatorSubsystem, 1),new ParallelCommandGroup( new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSuperFast, ()-> false).withTimeout(2.5),new SequentialCommandGroup(new WaitCommand(0.4),  new SetPivotCmd(pivotSubsystem, 1),new WaitCommand(0.4),new SetElevatorCmd(elevatorSubsystem,2),new SetPivotCmd(pivotSubsystem, 0)))));
-      m_gunnerController.leftBumper().onTrue(new SequentialCommandGroup(new SetElevatorCmd(elevatorSubsystem, 2),new ParallelCommandGroup( new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSuperFast, ()-> false).withTimeout(2.5),new SequentialCommandGroup(new WaitCommand(0.4),  new SetPivotCmd(pivotSubsystem, 1),new WaitCommand(0.4),new SetElevatorCmd(elevatorSubsystem,3),new SetPivotCmd(pivotSubsystem, 0)))));
+      
+      m_gunnerController.rightBumper().onTrue(new SequentialCommandGroup(
+        new SetElevatorCmd(elevatorSubsystem, 1),
+        new ParallelCommandGroup(
+          new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSuperFast, ()-> false).withTimeout(2.5),
+          new SequentialCommandGroup(
+            new WaitCommand(0.4),
+            new SetPivotCmd(pivotSubsystem, 1),
+            new WaitCommand(0.4),
+            new SetElevatorCmd(elevatorSubsystem,2),
+            new SetPivotCmd(pivotSubsystem, 0)))));
+
+      m_gunnerController.leftBumper().onTrue(new SequentialCommandGroup(
+        new SetElevatorCmd(elevatorSubsystem, 2),
+        new ParallelCommandGroup( 
+          new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedSuperFast, ()-> false).withTimeout(2.5),
+          new SequentialCommandGroup(
+            new WaitCommand(0.4),
+            new SetPivotCmd(pivotSubsystem, 1).withTimeout(0.4),
+            new SetElevatorCmd(elevatorSubsystem, 3).withTimeout(0.3),
+            new SetElevatorCmd(elevatorSubsystem, 2).withTimeout(0.3),
+            new SetPivotCmd(pivotSubsystem, 0)))));
       
       //Elevator setpoints
       m_gunnerController.povUp().whileTrue(new ParallelCommandGroup(new SetElevatorCmd(elevatorSubsystem, 4), new SetPivotCmd(pivotSubsystem, 0)));
