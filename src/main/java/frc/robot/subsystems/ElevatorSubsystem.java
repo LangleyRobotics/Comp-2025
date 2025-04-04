@@ -153,6 +153,10 @@ public class ElevatorSubsystem extends SubsystemBase{
         elevatorMotorLeft.setPosition(position);
     }
 
+    public void resetElevatorPosition() {
+        elevatorMotorLeft.setPosition(0);
+    }
+
     public void pidElev() {
         double motorVoltage = 0;
         motorVoltage = profiledPIDController.calculate(getElevatorPosition(), goal);

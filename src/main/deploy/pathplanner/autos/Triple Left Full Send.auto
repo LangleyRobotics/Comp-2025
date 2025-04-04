@@ -7,82 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start to J"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Elevator To L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Align Reef Left"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Outtake"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "J to Source"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Elevator To L1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake At Source"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Pivot To Up"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Source to K"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake Driving"
-                }
-              }
-            ]
+            "pathName": "Start to E"
           }
         },
         {
@@ -117,7 +42,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "K to Source"
+                  "pathName": "E to Source"
                 }
               },
               {
@@ -148,7 +73,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Source to L "
+                  "pathName": "Source to D"
                 }
               },
               {
@@ -174,6 +99,81 @@
                 "type": "named",
                 "data": {
                   "name": "Align Reef Left"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "D to Source"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Elevator To L1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake At Source"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Pivot To Up"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Source to C"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Driving"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Elevator To L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Align Reef Right"
                 }
               }
             ]

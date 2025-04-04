@@ -225,6 +225,7 @@ public class RobotContainer {
       m_driverController.leftStick().whileTrue(driveRobotOrientedAngularVelocitySuperSlow);
       m_driverController.rightStick().whileTrue(driveFieldOrientedAngularVelocitySlow);
       m_driverController.x().onTrue(Commands.runOnce(driveBase::zeroGyro));
+      m_driverController.a().onTrue(Commands.runOnce(elevatorSubsystem::resetElevatorPosition));
       m_driverController.leftBumper().toggleOnTrue(new AlignToReefTagRelative(false, driveBase));
       m_driverController.rightBumper().toggleOnTrue(new AlignToReefTagRelative(true, driveBase));
 
@@ -284,11 +285,15 @@ public class RobotContainer {
     var elevatatorToL1 = new SetElevatorCmd(elevatorSubsystem, 1).withTimeout(1.5);
     var elevatatorToL2 = new SetElevatorCmd(elevatorSubsystem, 2).withTimeout(1.5);
     var elevatatorToL3 = new SetElevatorCmd(elevatorSubsystem, 3).withTimeout(1.5);
-    var elevatatorToL4 = new SetElevatorCmd(elevatorSubsystem, 4).withTimeout(1.5);
+    var elevatatorToL4 = new ParallelCommandGroup(
+      new SetElevatorCmd(elevatorSubsystem, 4).withTimeout(1),
+      new SetPivotCmd(pivotSubsystem, 0).withTimeout(1),
+      new OuttakeControllerCmd(outtakeSubsystem, () -> OuttakeConstants.kOuttakeMotorSpeedSuperSlow, () -> 0.0, ()-> false).withTimeout(1));
 
     var outtake = new OuttakeControllerCmd(outtakeSubsystem, () -> 0.0, () -> OuttakeConstants.kOuttakeMotorSpeedFast, () -> false).withTimeout(0.75);
-    OuttakeAutoCmd intake = new OuttakeAutoCmd(outtakeSubsystem, intakeSubsystem, () -> true);
-    OuttakeAutoCmd intake2 = new OuttakeAutoCmd(outtakeSubsystem, intakeSubsystem, () -> true);
+
+    OuttakeAutoCmd intakeDriving = new OuttakeAutoCmd(outtakeSubsystem, intakeSubsystem, () -> true, () -> true);
+    OuttakeAutoCmd intakeAtSource = new OuttakeAutoCmd(outtakeSubsystem, intakeSubsystem, () -> true, () -> false);
 
     var alignReefLeft = new AlignToReefTagRelative(false, driveBase).withTimeout(1.7);
     var alignReefRight = new AlignToReefTagRelative(true, driveBase).withTimeout(1.7);
@@ -314,8 +319,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Elevator To L3", elevatatorToL3);
     NamedCommands.registerCommand("Elevator To L4", elevatatorToL4);
 
-    NamedCommands.registerCommand("Intake", intake);
-    NamedCommands.registerCommand("Intake 2", intake2);
+    NamedCommands.registerCommand("Intake Driving", intakeDriving);
+    NamedCommands.registerCommand("Intake At Source", intakeAtSource);
     NamedCommands.registerCommand("Outtake", outtake);
 
     NamedCommands.registerCommand("Align Reef Left", alignReefLeft);

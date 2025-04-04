@@ -18,13 +18,15 @@ public class OuttakeAutoCmd extends Command{
     private final OuttakeSubsystem outtakeSubsystem;
     private final IntakeSubsystem intakeSubsystem;
     private final Supplier<Boolean> intaking;
+    private final Supplier<Boolean> driving;
   
   
     public OuttakeAutoCmd(OuttakeSubsystem outtakeSubsystem, IntakeSubsystem intakeSubsystem,
-    Supplier<Boolean> intaking) {
+    Supplier<Boolean> intaking, Supplier<Boolean> driving) {
       this.outtakeSubsystem = outtakeSubsystem;
       this.intakeSubsystem = intakeSubsystem;
       this.intaking = intaking;
+      this.driving = driving;
   
       addRequirements(outtakeSubsystem, intakeSubsystem);
     }
@@ -59,8 +61,7 @@ public class OuttakeAutoCmd extends Command{
   
     @Override
     public boolean isFinished() {
-      return (intaking.get() && outtakeSubsystem.getAllGood()) || 
-             (!intaking.get() && !outtakeSubsystem.getAllGood());
+      return (intaking.get() && !driving.get() && outtakeSubsystem.getMoveForward()) ||  //intaking at source
+             (intaking.get() && driving.get() && outtakeSubsystem.getAllGood()); //intaking while driving
     }
   }
-  

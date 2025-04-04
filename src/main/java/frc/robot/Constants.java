@@ -232,7 +232,7 @@ public final class Constants {
     //Pivot Positions
     public static final double kMaxPivotPosition = 9;
     public static final double kReefPivotPosition = 8;
-    public static final double kMinPivotPosition = -0.1;
+    public static final double kMinPivotPosition = 0;
 
     public static final double kPivotOffset = 181;
     public static final double disPerRot = 360;
@@ -267,7 +267,7 @@ public final class Constants {
     public static final double kMinElevatorPosition = 5*0/12;
     public static final double upRightElevatorPosition = 5*0/12;
     public static final double scoringPosition = 5*0/12;
-    public static final double l1 = 5*0.0/12; //change when robot is built
+    public static final double l1 = 5*1.0/12; //change when robot is built
     public static final double l2 = 5*13.80/12;
     public static final double lowAlgae = 0;
     public static final double l3 = 5*40.82/12;
